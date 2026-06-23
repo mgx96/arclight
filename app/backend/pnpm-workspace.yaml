@@ -1,0 +1,6 @@
+# esbuild is a transitive dep; tsx ships its own copy, so its build script is irrelevant here.
+# Approve it anyway, and disable pnpm 11's pre-run install check that otherwise exits 1 on the
+# "ignored build" warning before every `pnpm run <script>`.
+onlyBuiltDependencies:
+  - esbuild
+verifyDepsBeforeRun: false

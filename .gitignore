@@ -1,0 +1,35 @@
+# Foundry build artifacts
+out/
+cache/
+broadcast/
+
+# Node
+node_modules/
+.next/
+dist/
+*.log
+.pnpm-debug.log*
+
+# Circuit build artifacts (generated; ptau/zkey/wasm are large)
+circuits/build/
+
+# Dependencies
+# (lib/ is committed by default with Foundry; uncomment to exclude)
+# lib/
+
+# Secrets — NEVER commit private keys or sensitive info, in any form
+.env
+.env.*
+*.key
+*.pem
+keystore/
+*.keystore
+secrets.json
+
+# OS / editor
+.DS_Store
+.vscode/
+.idea/
+
+# Docs build
+docs/book/

@@ -1,0 +1,31 @@
+{
+  "network": "arc-testnet",
+  "chainId": 5042002,
+  "rpcUrl": "https://rpc.testnet.arc.network",
+  "deployedAtBlock": 48333572,
+  "deployer": "0x7Fe819050290f176c479225812d749CbB5842F6B",
+  "owner": "0x7Fe819050290f176c479225812d749CbB5842F6B",
+  "attestor": "0x7Fe819050290f176c479225812d749CbB5842F6B",
+  "zkEnabled": false,
+  "core": {
+    "RevenuePool": "0xF848889d955bb1a59325Db91Fc1d52152E17A946",
+    "ProofOfView": "0x1bE08B8DfB8e87F7b30315afE1d367780b0AF3Ec",
+    "RevenueSplitter": "0x707Ed9d732779a204E6C4C448B4E9930cB1ab8C5"
+  },
+  "modules": {
+    "ArcCctpGateway": "0x4A0Fb26B9e774d85aA0D4E3C3D077ebcc3E0572a",
+    "StableFxPayoutRouter": "0xEf70f1ABb1581845F9812511a774F65F0724dABc",
+    "CreatorTreasury": "0xF8D996fEa13184b440b36454418FF40556F1c88D",
+    "AdvertiserAgentRegistry": "0xa6A2B86f8ff81bA2237991F4Aa8Da3a3428E88F9"
+  },
+  "circleDependencies": {
+    "USDC": "0x3600000000000000000000000000000000000000",
+    "EURC": "0x89B50855Aa3bE2F677cD6303Cec089B5F319D72a",
+    "FxEscrow": "0x867650F5eAe8df91445971f14d89fd84F0C9a9f8",
+    "USYC": "0xe9185F0c5F296Ed1797AaE4238D26CCaBEadb86C",
+    "UsycTeller": "0x9fdF14c5B14173D74C08Af27AebFf39240dC105A",
+    "CctpTokenMessenger": "0x8FE6B999Dc680CcFDD5Bf7EB0974218be2542DAA",
+    "CctpMessageTransmitter": "0xE737e5cEBEEBa77EFE34D4aa090756590b1CE275"
+  },
+  "privacyVerifier": "0x0000000000000000000000000000000000000000"
+}

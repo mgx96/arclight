@@ -1,0 +1,33 @@
+{
+  "name": "arclight-backend",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Arclight demo backend: proof-of-view attestor + Circle Gateway nanopayment agent.",
+  "scripts": {
+    "keygen": "tsx src/setup.ts",
+    "deposit": "tsx src/deposit.ts",
+    "dev": "tsx watch src/server.ts",
+    "start": "tsx src/server.ts",
+    "balance": "tsx src/balance.ts"
+  },
+  "dependencies": {
+    "@circle-fin/x402-batching": "^3.2.0",
+    "@x402/core": "^2.16.0",
+    "@x402/evm": "^2.16.0",
+    "cors": "^2.8.5",
+    "dotenv": "^17.3.1",
+    "express": "^5.2.1",
+    "viem": "^2.53.1"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/express": "^5.0.6",
+    "@types/node": "^20.19.43",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": ["esbuild"]
+  }
+}

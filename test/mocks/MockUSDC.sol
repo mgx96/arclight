@@ -1,0 +1,21 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.30;
+
+import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+
+/**
+ * @title MockUSDC
+ * @author Malek Sharabi
+ * @notice A 6 decimal ERC20 we use in tests to stand in for USDC on Arc.
+ */
+contract MockUSDC is ERC20 {
+    constructor() ERC20("Mock USD Coin", "USDC") {}
+
+    function decimals() public pure override returns (uint8) {
+        return 6;
+    }
+
+    function mint(address to, uint256 amount) external {
+        _mint(to, amount);
+    }
+}

@@ -1,0 +1,6 @@
+# sharp + unrs-resolver native builds are not needed for `next dev`; acknowledge them as ignored
+# and disable pnpm 11's pre-run install check so `pnpm dev/build` don't fail on the warning.
+ignoredBuiltDependencies:
+  - sharp
+  - unrs-resolver
+verifyDepsBeforeRun: false
