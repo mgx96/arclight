@@ -32,6 +32,9 @@ export type PayoutRecord = {
 
 const PAYOUTS_KEY = "arclight.payouts";
 
+// On the static GitHub Pages showcase the backend and live attestation are simulated in memory.
+const SHOWCASE = process.env.NEXT_PUBLIC_SHOWCASE === "1";
+
 type DemoState = {
   backendUp: boolean | null;
   config: BackendConfig | null;
@@ -160,25 +163,35 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
         const cfg = await api.config();
         if (cancelled) return;
         setConfig(cfg);
-        push("info", `Backend live · agent ${cfg.addresses.agent.slice(0, 8)}… · price ${cfg.viewPrice} per view`);
+        push("info", SHOWCASE
+          ? `Demo mode · simulated settlement · agent ${cfg.addresses.agent.slice(0, 8)}… · price ${cfg.viewPrice} per view`
+          : `Backend live · agent ${cfg.addresses.agent.slice(0, 8)}… · price ${cfg.viewPrice} per view`);
 
         await refresh();
 
-        try {
-          const onchain = (await publicClient.readContract({
-            address: CONTRACTS.ProofOfView,
-            abi: PROOF_OF_VIEW_ABI,
-            functionName: "getAttestor",
-          })) as string;
+        // The showcase has no live RPC; treat the attestor as trusted so the panel reads normally.
+        if (SHOWCASE) {
           if (cancelled) return;
-          setOnchainAttestor(onchain);
-          const trusted = onchain.toLowerCase() === cfg.addresses.attestor.toLowerCase();
-          setAttestorTrusted(trusted);
-          push(trusted ? "good" : "bad", trusted
-            ? `Onchain ProofOfView trusts this attestor ✓`
-            : `Warning: onchain attestor ${onchain.slice(0, 8)}… ≠ signer`);
-        } catch {
-          if (!cancelled) push("bad", "Could not read onchain attestor (RPC).");
+          setOnchainAttestor(cfg.addresses.attestor);
+          setAttestorTrusted(true);
+          push("good", "Onchain ProofOfView trusts this attestor ✓ (simulated)");
+        } else {
+          try {
+            const onchain = (await publicClient.readContract({
+              address: CONTRACTS.ProofOfView,
+              abi: PROOF_OF_VIEW_ABI,
+              functionName: "getAttestor",
+            })) as string;
+            if (cancelled) return;
+            setOnchainAttestor(onchain);
+            const trusted = onchain.toLowerCase() === cfg.addresses.attestor.toLowerCase();
+            setAttestorTrusted(trusted);
+            push(trusted ? "good" : "bad", trusted
+              ? `Onchain ProofOfView trusts this attestor ✓`
+              : `Warning: onchain attestor ${onchain.slice(0, 8)}… ≠ signer`);
+          } catch {
+            if (!cancelled) push("bad", "Could not read onchain attestor (RPC).");
+          }
         }
       } catch {
         if (!cancelled) {
@@ -257,13 +270,15 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
         push("info", "Nothing to withdraw yet. Your earnings are still building up in the Gateway balance.");
         return;
       }
-      if (!recipient) {
+      // In the showcase there's no wallet to connect, so settle into the demo creator address.
+      const dest = recipient ?? (SHOWCASE ? config?.addresses.creator : undefined);
+      if (!dest) {
         push("info", "Connect a wallet first — Withdraw settles your Gateway balance straight into it.");
         return;
       }
       const moving = amount ? Number(amount) : available;
       push("pay", `Withdrawing ${moving.toFixed(2)} USDC from your Gateway balance into your wallet …`);
-      const res = await api.creatorWithdraw(amount, recipient);
+      const res = await api.creatorWithdraw(amount, dest);
       push("good", `Landed in your wallet ✓ ${res.amount} USDC`, { label: "View on Arcscan", url: explorerTx(res.mintTxHash) });
       recordPayout("withdraw", res.amount, "Settled", [{ label: "Arcscan ↗", url: explorerTx(res.mintTxHash) }]);
       await refresh();
@@ -273,7 +288,7 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
     } finally {
       setWithdrawing(false);
     }
-  }, [creatorBalances, push, refresh, recordPayout]);
+  }, [creatorBalances, config, push, refresh, recordPayout]);
 
   // Move the creator's on-chain earnings into the Circle Programmable Wallet (Developer-Controlled)
   // treasury — a real native-USDC transfer on Arc from the creator EOA to the Circle-managed address.

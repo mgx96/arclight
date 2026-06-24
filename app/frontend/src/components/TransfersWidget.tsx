@@ -129,17 +129,21 @@ function Dormant({ what }: { what: string }) {
   );
 }
 
+const SHOWCASE = process.env.NEXT_PUBLIC_SHOWCASE === "1";
+
 function WithdrawBody() {
   const { creatorBalances, withdrawCreator, withdrawing, busy } = useDemo();
   const { address, isConnected } = useAccount();
   const credited = Number(creatorBalances?.gateway.available ?? 0);
+  // The static showcase has no wallet to connect, so allow the withdraw and settle to a demo address.
+  const gateOk = isConnected || SHOWCASE;
   return (
     <>
       <Lead>
         Your per view payments get batched by Circle Gateway into a credited balance, gaslessly. Withdraw mints that
         straight into your connected wallet on Arc — one instant hop, one fee.
       </Lead>
-      {!isConnected && (
+      {!isConnected && !SHOWCASE && (
         <div className="mb-3 flex items-center justify-between gap-3 rounded-xl border border-[var(--accent)]/30 bg-[var(--accent)]/[0.06] px-3 py-2.5 text-sm text-[var(--muted)]">
           <span>Connect a wallet to withdraw into it.</span>
           <WalletConnect />
@@ -152,7 +156,7 @@ function WithdrawBody() {
         cta="Withdraw"
         busyLabel="Withdrawing…"
         busy={withdrawing}
-        disabled={busy || !isConnected}
+        disabled={busy || !gateOk}
         emptyHint="Nothing credited yet. Your earnings show up here a moment after each view. Watch the video on the dashboard to earn some."
         onRun={(amount) => void withdrawCreator(amount, address)}
         footer="Same chain, instant. The credited balance becomes normal USDC in your connected wallet."

@@ -1,4 +1,6 @@
 // Typed client for the Arclight backend (attestor + Circle Gateway nanopayment agent).
+import { createMockApi } from "./api.mock";
+
 const BASE =
   process.env.NEXT_PUBLIC_BACKEND_URL?.replace(/\/$/, "") ?? "http://localhost:8787";
 
@@ -115,7 +117,7 @@ export class ApiError extends Error {
   }
 }
 
-export const api = {
+const realApi = {
   base: BASE,
   health: () => req<{ ok: boolean }>("/health"),
   config: () => req<BackendConfig>("/config"),
@@ -153,3 +155,11 @@ export const api = {
   payView: (proof: { attestation: AttestationJson; signature: string }) =>
     req<PayViewResponse>("/agent/pay-view", { method: "POST", body: JSON.stringify(proof) }),
 };
+
+// On the static GitHub Pages showcase there is no backend, so swap in the in memory simulation. The
+// factory takes ApiError so the mock throws the exact class the UI checks (e.g. status 409 on replay).
+// Typed as the real client so every call site keeps the same signatures; the mock is runtime compatible.
+export const api: typeof realApi =
+  process.env.NEXT_PUBLIC_SHOWCASE === "1"
+    ? (createMockApi(ApiError) as unknown as typeof realApi)
+    : realApi;
