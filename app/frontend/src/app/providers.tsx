@@ -6,11 +6,14 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState } from "react";
 import { arcTestnet } from "@/lib/chain";
 
-// wagmi is wired so wallet-based on-chain actions can be added later; the live demo flows read via
-// viem's public client and pay via the backend agent, so no wallet connection is required to use it.
+// Wallet connect is used to pick where Send and Bridge land. EIP-6963 discovery (on by default) adds
+// each installed wallet as its own connector, so the user can choose MetaMask vs Coinbase vs others
+// instead of us auto-grabbing whatever wallet hijacked window.ethereum. The generic injected() stays
+// as a labelled fallback for browsers that don't announce via EIP-6963.
 const wagmiConfig = createConfig({
   chains: [arcTestnet],
-  connectors: [injected()],
+  connectors: [injected({ shimDisconnect: true })],
+  multiInjectedProviderDiscovery: true,
   transports: { [arcTestnet.id]: http() },
   ssr: true,
 });

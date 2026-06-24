@@ -16,6 +16,49 @@ export type Balances = {
   gateway: { available: string; total: string; withdrawable: string };
 };
 
+export type CreatorBalances = {
+  address: string;
+  wallet: { formatted: string; raw: string };
+  gateway: { available: string; total: string; withdrawing: string; withdrawable: string };
+};
+
+export type WithdrawResponse = {
+  withdrawn: boolean;
+  amount: string;
+  mintTxHash: string;
+  recipient: string;
+};
+
+// Creator's Circle Programmable Wallet (Developer-Controlled) treasury. `configured:false` when the
+// backend has no Circle Console credentials, so the UI can show a dormant state instead of erroring.
+export type Treasury =
+  | { configured: false }
+  | { configured: true; address: string; walletId: string; blockchain: string; usdc: string };
+
+export type SweepResponse = { swept: boolean; amount: string; to: string; txHash: string };
+
+export type TreasuryPayoutResponse = {
+  paidOut: boolean;
+  circleTxId: string;
+  state: string;
+  txHash: string | null;
+  amount: string;
+  destination: string;
+};
+
+// Full CCTP round-trip result: USDC bridged from the managed Circle wallet on Arc to Ethereum Sepolia.
+export type BridgeResult = {
+  bridged: boolean;
+  amount: string;
+  recipient: string;
+  destinationChain: string;
+  sourceDomain: number;
+  approveTxId: string;
+  burnTxHash: string;
+  messageHash: string;
+  mintTxHash: string;
+};
+
 export type AttestationJson = {
   viewId: `0x${string}`;
   advertiser: `0x${string}`;
@@ -77,7 +120,29 @@ export const api = {
   health: () => req<{ ok: boolean }>("/health"),
   config: () => req<BackendConfig>("/config"),
   balances: () => req<Balances>("/balances"),
+  creatorBalances: () => req<CreatorBalances>("/creator/balances"),
+  creatorWithdraw: (amount?: string, recipient?: string) =>
+    req<WithdrawResponse>("/creator/withdraw", {
+      method: "POST",
+      body: JSON.stringify({ ...(amount ? { amount } : {}), ...(recipient ? { recipient } : {}) }),
+    }),
   receipts: () => req<{ receipts: Receipt[] }>("/receipts"),
+  treasury: () => req<Treasury>("/creator/treasury"),
+  sweepToTreasury: (amount?: string) =>
+    req<SweepResponse>("/creator/sweep-to-treasury", {
+      method: "POST",
+      body: JSON.stringify(amount ? { amount } : {}),
+    }),
+  treasuryPayout: (body?: { amount?: string; destination?: string }) =>
+    req<TreasuryPayoutResponse>("/creator/treasury/payout", {
+      method: "POST",
+      body: JSON.stringify(body ?? {}),
+    }),
+  bridge: (body?: { amount?: string; recipient?: string }) =>
+    req<BridgeResult>("/creator/bridge", {
+      method: "POST",
+      body: JSON.stringify(body ?? {}),
+    }),
   attest: (input: {
     advertiser: string;
     creator: string;

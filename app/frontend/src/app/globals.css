@@ -1,16 +1,47 @@
 @import "tailwindcss";
 
+/* ---------- Dark theme (default) ---------- */
 :root {
-  --background: #07090e;
-  --surface: #0d111a;
-  --surface-2: #131927;
-  --border-color: #1e2638;
-  --foreground: #e8ecf4;
-  --muted: #8a93a6;
+  --background: #06080d;
+  --surface: #0c1018;
+  --surface-2: #121826;
+  --border-color: #1d2536;
+  --foreground: #e9edf5;
+  --muted: #8b94a7;
   --accent: #ffb020;
   --accent-soft: #ffd27a;
   --good: #34d399;
   --bad: #f87171;
+
+  --grid-line: rgba(255, 255, 255, 0.022);
+  --glow-1: rgba(255, 176, 32, 0.10);
+  --glow-2: rgba(56, 132, 255, 0.09);
+  --ring: rgba(255, 176, 32, 0.45);
+  --scrollbar: #232b3d;
+  --panel-shadow: 0 1px 0 0 rgba(255, 255, 255, 0.04) inset, 0 12px 40px -24px rgba(0, 0, 0, 0.8);
+  color-scheme: dark;
+}
+
+/* ---------- Light theme ---------- */
+:root[data-theme="light"] {
+  --background: #f5f6fb;
+  --surface: #ffffff;
+  --surface-2: #eef1f7;
+  --border-color: #e2e6ef;
+  --foreground: #0e1320;
+  --muted: #5c6478;
+  --accent: #e6920a;
+  --accent-soft: #a96a08;
+  --good: #0f9d6b;
+  --bad: #d8453f;
+
+  --grid-line: rgba(12, 18, 34, 0.045);
+  --glow-1: rgba(255, 176, 32, 0.16);
+  --glow-2: rgba(56, 132, 255, 0.10);
+  --ring: rgba(230, 146, 10, 0.40);
+  --scrollbar: #c9cedb;
+  --panel-shadow: 0 1px 0 0 rgba(255, 255, 255, 0.7) inset, 0 12px 32px -24px rgba(20, 30, 60, 0.35);
+  color-scheme: light;
 }
 
 @theme inline {
@@ -32,9 +63,20 @@ body {
 
 body {
   background-image:
-    radial-gradient(900px 480px at 85% -10%, rgba(255, 176, 32, 0.10), transparent 60%),
-    radial-gradient(700px 420px at 0% 0%, rgba(56, 132, 255, 0.08), transparent 55%);
+    radial-gradient(900px 480px at 85% -10%, var(--glow-1), transparent 60%),
+    radial-gradient(700px 420px at 0% 0%, var(--glow-2), transparent 55%),
+    linear-gradient(var(--grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+  background-size: auto, auto, 46px 46px, 46px 46px;
+  background-position: 0 0, 0 0, center, center;
   background-attachment: fixed;
+}
+
+/* smooth swap when toggling themes (per-element transitions still win via class specificity) */
+*,
+*::before,
+*::after {
+  transition: background-color 0.25s ease, border-color 0.25s ease;
 }
 
 .font-mono {
@@ -46,15 +88,25 @@ body {
   width: 8px;
 }
 .scroll-slim::-webkit-scrollbar-thumb {
-  background: #232b3d;
+  background: var(--scrollbar);
   border-radius: 999px;
 }
 
 @keyframes pulse-ring {
-  0% { box-shadow: 0 0 0 0 rgba(255, 176, 32, 0.45); }
+  0% { box-shadow: 0 0 0 0 var(--ring); }
   70% { box-shadow: 0 0 0 12px rgba(255, 176, 32, 0); }
   100% { box-shadow: 0 0 0 0 rgba(255, 176, 32, 0); }
 }
 .pulse-ring {
   animation: pulse-ring 1.6s infinite;
+}
+
+/* subtle accent hairline at the top of feature panels */
+.panel-accent::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  opacity: 0.4;
 }

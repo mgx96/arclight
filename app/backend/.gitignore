@@ -4,3 +4,7 @@ node_modules/
 .env.*.local
 *.log
 dist/
+# Circle developer-controlled-wallet provisioning cache (wallet ids/addresses, no secrets)
+.circle-treasury.json
+# Circle entity-secret recovery file, if ever written into the repo by mistake
+recovery-file.json

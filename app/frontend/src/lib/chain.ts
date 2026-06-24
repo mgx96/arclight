@@ -5,7 +5,10 @@ import { createPublicClient, defineChain, http, type Abi } from "viem";
 export const arcTestnet = defineChain({
   id: 5_042_002,
   name: "Arc Testnet",
-  nativeCurrency: { name: "USDC", symbol: "USDC", decimals: 6 },
+  // On Arc, USDC is the native gas token and is 18-decimal at the EVM level (eth_getBalance returns
+  // 18-dec base units), even though the ERC-20 USDC interface is 6-dec. wagmi's useBalance formats the
+  // native balance with these decimals, so this must be 18 for a connected wallet's balance to read right.
+  nativeCurrency: { name: "USDC", symbol: "USDC", decimals: 18 },
   rpcUrls: {
     default: { http: ["https://rpc.testnet.arc.network"] },
   },
@@ -44,4 +47,15 @@ export const PROOF_OF_VIEW_ABI = [
 
 export function explorerAddress(addr: string): string {
   return `${arcTestnet.blockExplorers.default.url}/address/${addr}`;
+}
+
+// Block-explorer transaction links, so any settled transfer can be opened and inspected.
+export function explorerTx(hash: string): string {
+  return `${arcTestnet.blockExplorers.default.url}/tx/${hash}`;
+}
+
+export const SEPOLIA_EXPLORER = "https://sepolia.etherscan.io";
+
+export function sepoliaTx(hash: string): string {
+  return `${SEPOLIA_EXPLORER}/tx/${hash}`;
 }

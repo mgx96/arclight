@@ -1,6 +1,6 @@
 "use client";
 
-import { Panel, Stat, Addr, Button, Pill } from "./ui";
+import { Panel, Stat, Addr, Pill, Button } from "./ui";
 import { useDemo } from "./demo-store";
 
 export function AdvertiserPanel() {
@@ -42,12 +42,12 @@ export function AdvertiserPanel() {
             >
               +
             </button>
-            <span className="text-[var(--muted)]">switch campaign to mint fresh nullifiers</span>
+            <span className="text-[var(--muted)]">new campaign, fresh nullifiers</span>
           </div>
         </Row>
       </div>
 
-      <div className="mt-4 flex items-center justify-between">
+      <div className="mt-4 flex items-center justify-between gap-3">
         <Pill tone={Number(balances?.gateway.available ?? 0) > 0 ? "good" : "bad"}>
           {Number(balances?.gateway.available ?? 0) > 0 ? "funded & ready" : "needs deposit"}
         </Pill>
@@ -57,8 +57,7 @@ export function AdvertiserPanel() {
       </div>
 
       <p className="mt-3 text-[11px] text-[var(--muted)]">
-        Top up from the terminal: <span className="font-mono text-[var(--accent-soft)]">pnpm deposit 5</span> in{" "}
-        <span className="font-mono">app/backend</span>.
+        Spends from a prefunded Circle Gateway balance. Every paid view draws down this balance in real time, gasless.
       </p>
     </Panel>
   );

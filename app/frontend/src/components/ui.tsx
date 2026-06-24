@@ -17,18 +17,14 @@ export function Panel({
 }) {
   return (
     <section
-      className={`rounded-2xl border border-[var(--border-color)] bg-[var(--surface)]/80 backdrop-blur p-5 shadow-[0_1px_0_0_rgba(255,255,255,0.03)_inset] ${className}`}
+      className={`rounded-2xl border border-[var(--border-color)] bg-[var(--surface)]/40 p-6 transition-colors hover:border-[var(--accent)]/20 ${className}`}
     >
-      <header className="mb-4 flex items-start justify-between gap-3">
-        <div>
-          <h2 className="text-sm font-semibold tracking-wide text-[var(--foreground)]">{title}</h2>
-          {subtitle && <p className="mt-0.5 text-xs text-[var(--muted)]">{subtitle}</p>}
-        </div>
+      <header className="mb-5">
         {accent && (
-          <span className="shrink-0 rounded-full border border-[var(--border-color)] px-2 py-0.5 text-[10px] uppercase tracking-widest text-[var(--muted)]">
-            {accent}
-          </span>
+          <div className="text-[11px] uppercase tracking-[0.18em] text-[var(--muted)]">{accent}</div>
         )}
+        <h2 className="mt-1.5 text-lg font-semibold leading-snug tracking-tight text-[var(--foreground)]">{title}</h2>
+        {subtitle && <p className="mt-1.5 text-sm leading-relaxed text-[var(--muted)]">{subtitle}</p>}
       </header>
       {children}
     </section>
@@ -37,9 +33,9 @@ export function Panel({
 
 export function Stat({ label, value, hint }: { label: string; value: React.ReactNode; hint?: string }) {
   return (
-    <div className="rounded-xl border border-[var(--border-color)] bg-[var(--surface-2)]/60 px-3 py-2.5">
-      <div className="text-[10px] uppercase tracking-widest text-[var(--muted)]">{label}</div>
-      <div className="mt-1 text-base font-semibold text-[var(--foreground)]">{value}</div>
+    <div className="border-l border-[var(--border-color)] pl-3">
+      <div className="text-xl font-semibold tracking-tight text-[var(--foreground)]">{value}</div>
+      <div className="mt-1 text-[10px] uppercase tracking-[0.16em] text-[var(--muted)]">{label}</div>
       {hint && <div className="mt-0.5 text-[11px] text-[var(--muted)]">{hint}</div>}
     </div>
   );
@@ -77,7 +73,7 @@ export function Button({
 }) {
   const styles: Record<string, string> = {
     primary:
-      "bg-[var(--accent)] text-black hover:bg-[var(--accent-soft)] disabled:bg-[var(--surface-2)] disabled:text-[var(--muted)]",
+      "bg-[var(--accent)] text-black shadow-[0_8px_24px_-10px_var(--accent)] hover:bg-[var(--accent-soft)] disabled:bg-[var(--surface-2)] disabled:text-[var(--muted)] disabled:shadow-none",
     ghost:
       "border border-[var(--border-color)] text-[var(--foreground)] hover:bg-[var(--surface-2)] disabled:text-[var(--muted)]",
     danger:
@@ -87,7 +83,7 @@ export function Button({
     <button
       onClick={onClick}
       disabled={disabled}
-      className={`rounded-xl px-4 py-2 text-sm font-semibold transition disabled:cursor-not-allowed ${styles[variant]} ${className}`}
+      className={`rounded-full px-5 py-2.5 text-sm font-semibold transition active:scale-[0.99] disabled:cursor-not-allowed disabled:active:scale-100 ${styles[variant]} ${className}`}
     >
       {children}
     </button>

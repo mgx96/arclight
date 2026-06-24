@@ -35,8 +35,18 @@ export const ENV = {
   agentPrivateKey: requireHexKey("AGENT_PRIVATE_KEY"),
   attestorPrivateKey: requireHexKey("ATTESTOR_PRIVATE_KEY"),
   creatorAddress: requireAddress("CREATOR_ADDRESS"),
+  // Lets the creator read its own Gateway balance and withdraw credited earnings on-chain.
+  creatorPrivateKey: requireHexKey("CREATOR_PRIVATE_KEY"),
   viewPrice: process.env.VIEW_PRICE ?? "$0.01",
   port: Number(process.env.PORT ?? 8787),
   // The server calls its own creator endpoint as the buyer; override if proxied.
   selfUrl: process.env.SELF_URL ?? `http://localhost:${process.env.PORT ?? 8787}`,
+  // Circle Programmable Wallets (Developer-Controlled). Optional: only needed for the creator's
+  // Circle-managed treasury wallet. Both come from the Circle Developer Console — the API key you
+  // generate there, plus an entity secret you register via `pnpm circle:gen` / `pnpm circle:register`.
+  circleApiKey: process.env.CIRCLE_API_KEY?.trim() || undefined,
+  circleEntitySecret: process.env.CIRCLE_ENTITY_SECRET?.trim() || undefined,
 };
+
+// True only when both Circle Console credentials are present, so the treasury feature can light up.
+export const HAS_CIRCLE_CREDS = Boolean(ENV.circleApiKey && ENV.circleEntitySecret);
