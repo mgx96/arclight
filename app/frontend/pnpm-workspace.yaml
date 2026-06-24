@@ -4,3 +4,6 @@ ignoredBuiltDependencies:
   - sharp
   - unrs-resolver
 verifyDepsBeforeRun: false
+# A fresh `pnpm install` (e.g. in CI) otherwise exits 1 just because the builds above were
+# ignored; we have already decided to skip them, so don't fail the install over it.
+strictDepBuilds: false
