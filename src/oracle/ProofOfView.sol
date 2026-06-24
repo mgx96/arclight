@@ -15,7 +15,9 @@ import {IViewPrivacyVerifier} from "../interfaces/IViewPrivacyVerifier.sol";
  * @dev Attestations are EIP712 signed by a trusted off chain metering service. The viewer is only referenced by a
  * hiding commitment so their identity never hits the public chain. When a privacy verifier is configured we also demand
  * a zero knowledge proof and burn a nullifier, so a viewer is counted at most once per campaign and epoch without us
- * ever learning who they are. That privacy layer is pluggable and will be backed by Arc Configurable Privacy later.
+ * ever learning who they are. This viewer anonymity and anti sybil gate is its own layer, complementary to Arc
+ * Configurable Privacy rather than replaced by it: Arc Configurable Privacy hides transfer amounts at settlement, while
+ * this hides viewer identity and enforces the one per viewer uniqueness a confidential transfer feature cannot express.
  */
 contract ProofOfView is IProofOfView, Ownable, EIP712 {
     error ProofOfView__ZeroAddress();
@@ -90,9 +92,9 @@ contract ProofOfView is IProofOfView, Ownable, EIP712 {
     /**
      * @notice Set or rotate the privacy verifier that proves a genuine unique viewer without revealing them.
      * @param privacyVerifier The new privacy verifier, or the zero address to run without the zero knowledge gate.
-     * @dev Only the owner can call. While Arc Configurable Privacy is still in development we point this at our
-     * application level zero knowledge verifier. Setting it to the zero address turns the gate off and falls back to
-     * trusting the attestor alone, which is how we run before the privacy layer is wired.
+     * @dev Only the owner can call. We point this at our application level zero knowledge verifier, which is the viewer
+     * anonymity and anti sybil layer and is independent of Arc Configurable Privacy. Setting it to the zero address turns
+     * the gate off and falls back to trusting the attestor alone, which is how we run before the privacy layer is wired.
      */
     function setPrivacyVerifier(address privacyVerifier) external onlyOwner {
         s_privacyVerifier = IViewPrivacyVerifier(privacyVerifier);

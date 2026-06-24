@@ -35,6 +35,15 @@ Once the USDC lands, the creator can route it through Circle's stablecoin rails 
 - **Earn yield** on idle balance through USYC.
 - **Bridge out** to another chain through CCTP V2.
 
+## Privacy
+
+Arclight uses two privacy layers that solve different problems and compose rather than replace each other:
+
+- **Proof of view (our zero knowledge layer, always on).** Each view is proven by a Groth16 circuit (`circuits/view.circom`) that hides the viewer behind a commitment and emits a nullifier. The nullifier mixes in the campaign id, so the tokens one viewer produces across different videos are uncorrelatable. That gives three properties at once: viewer anonymity, sybil resistance (one paid view per viewer, per campaign, per epoch), and no reconstructable on chain watch history. This is integrity, so it stays on.
+- **Arc Configurable Privacy (Circle's TEE confidential transfers, opt in).** When live, this hides the *amounts* of the USDC payouts at settlement while keeping addresses visible for compliance. It is the settlement layer counterpart: it conceals how much a creator earns per view, which our proof of view layer does not attempt. It cannot hide viewer identity or prove view uniqueness, so it does not replace the layer above.
+
+Together: who watched is private and unforgeable (our ZK), and how much they were paid can be confidential (Arc Configurable Privacy).
+
 ## Why Arc
 
 Arc is built for stablecoin payments, so the things that make per view payouts impossible everywhere else just work here:
