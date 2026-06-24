@@ -1,0 +1,70 @@
+name: Deploy frontend showcase to GitHub Pages
+
+# Publishes the Arclight frontend as a static UI showcase at https://mgx96.github.io/arclight/.
+# This is UI only on purpose: the live nanopayment flow needs the local backend (attestor +
+# Gateway agent), which holds testnet keys and cannot be public. The showcase banner says so.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "app/frontend/**"
+      - ".github/workflows/deploy-pages.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Let one deploy finish before the next starts; don't cancel an in-flight publish.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: app/frontend
+    env:
+      STATIC_EXPORT: "1"
+      PAGES_BASE_PATH: "/arclight"
+      NEXT_PUBLIC_SHOWCASE: "1"
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: app/frontend/pnpm-lock.yaml
+
+      - run: pnpm install --frozen-lockfile
+
+      - run: pnpm build
+
+      # Scratch design explorations are not part of the public showcase.
+      - run: rm -rf out/redesign
+
+      # Pages serves 404.html for unknown paths; reuse the SPA index so deep links resolve.
+      - run: cp out/index.html out/404.html || true
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: app/frontend/out
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
