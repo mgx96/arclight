@@ -116,4 +116,4 @@ All keys in the demo are throwaway testnet keys. They live in a gitignored `.env
 
 ## License
 
-MIT. See [LICENSE](./LICENSE).
+MIT. See [LICENSE](./LICENSE)
