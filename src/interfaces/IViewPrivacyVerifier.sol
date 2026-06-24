@@ -6,10 +6,7 @@ pragma solidity ^0.8.30;
  * @author Malek Sharabi
  * @notice The viewer anonymity and anti sybil layer of Arclight. It proves a genuine unique viewer stands behind a
  * payout without revealing who they are, and binds an unlinkable nullifier so the same viewer is counted at most once.
- * We back it with an application level zero knowledge proof. This is distinct from and complementary to Arc Configurable
- * Privacy: Arc Configurable Privacy is TEE backed confidential transfers that hide payment amounts at settlement while
- * disclosing addresses, so it cannot hide a viewer's identity nor prove the uniqueness predicate this interface needs.
- * The two layers compose, they do not substitute, so this verifier stays as our always on integrity gate.
+ * We back it with an application level zero knowledge proof.
  * @dev The commitment hides the viewer identity and the nullifier is a one per viewer per campaign and epoch token that
  * gives us sybil resistance without surveillance. Because campaignId is mixed into the nullifier, the tokens a single
  * viewer produces across different videos are uncorrelatable, so no on chain watch history can be reconstructed. The
