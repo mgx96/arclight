@@ -138,6 +138,18 @@ export function createMockApi(ApiError: ApiErrorCtor) {
     usdc: usdc(state.treasuryUsdc),
   });
 
+  // The old standalone "Deposit" step, folded into bridge/send: move the creator's wallet balance into
+  // the managed wallet (keeping a little behind for Arc gas) so those actions are one click. Mirrors the
+  // backend's autoSweepToTreasury. Returns the amount moved (0 when the wallet is at/below the reserve).
+  const MOVE_GAS_RESERVE = 0.02;
+  function autoSweep(): number {
+    const moving = Math.max(0, state.creatorWallet - MOVE_GAS_RESERVE);
+    if (moving <= 0) return 0;
+    state.creatorWallet -= moving;
+    state.treasuryUsdc += moving;
+    return moving;
+  }
+
   return {
     base: "demo",
     health: async () => {
@@ -249,6 +261,7 @@ export function createMockApi(ApiError: ApiErrorCtor) {
     },
     treasuryPayout: async (body?: { amount?: string; destination?: string }): Promise<TreasuryPayoutResponse> => {
       await delay(1300);
+      autoSweep(); // fold in the old Deposit step: pull the wallet into the managed wallet first
       const moving = body?.amount ? Number(body.amount) : state.treasuryUsdc;
       state.treasuryUsdc = Math.max(0, state.treasuryUsdc - moving);
       return {
@@ -262,6 +275,7 @@ export function createMockApi(ApiError: ApiErrorCtor) {
     },
     bridge: async (body?: { amount?: string; recipient?: string }): Promise<BridgeResult> => {
       await delay(2600);
+      autoSweep(); // fold in the old Deposit step: pull the wallet into the managed wallet first
       const moving = body?.amount ? Number(body.amount) : state.treasuryUsdc;
       state.treasuryUsdc = Math.max(0, state.treasuryUsdc - moving);
       return {

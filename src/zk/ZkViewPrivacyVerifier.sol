@@ -10,11 +10,7 @@ import {IGroth16Verifier} from "../interfaces/IGroth16Verifier.sol";
  * @notice The zero knowledge backend of the Arclight viewer anonymity and anti sybil layer. It adapts our snarkjs
  * Groth16 verifier to the IViewPrivacyVerifier interface the oracle consumes, so the rest of the system stays agnostic
  * to how the proof is produced.
- * @dev This proves a unique anonymous viewer and binds a nullifier for sybil resistance. It is not Arc Configurable
- * Privacy and is not replaced by it: Arc Configurable Privacy hides transfer amounts at settlement, whereas this hides
- * viewer identity and proves a uniqueness predicate, which a confidential transfer feature does not express. The two are
- * complementary layers. If a future on chain primitive can verify the same commitment, nullifier and uniqueness
- * semantics, only this adapter is swapped and nothing above the interface changes. We assemble the public signals in the
+ * @dev This proves a unique anonymous viewer and binds a nullifier for sybil resistance. We assemble the public signals in the
  * exact order the circuit fixes them, [commitment, nullifier, campaignId, epoch].
  */
 contract ZkViewPrivacyVerifier is IViewPrivacyVerifier {

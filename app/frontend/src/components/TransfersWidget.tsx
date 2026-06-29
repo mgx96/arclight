@@ -8,11 +8,10 @@ import { WalletConnect } from "./WalletConnect";
 import { Addr } from "./ui";
 import { useDemo } from "./demo-store";
 
-type TabKey = "withdraw" | "move" | "bridge" | "send";
+type TabKey = "withdraw" | "bridge" | "send";
 
 const TABS: { key: TabKey; label: string }[] = [
   { key: "withdraw", label: "Withdraw" },
-  { key: "move", label: "Deposit" },
   { key: "bridge", label: "Bridge" },
   { key: "send", label: "Send" },
 ];
@@ -20,17 +19,17 @@ const TABS: { key: TabKey; label: string }[] = [
 const GAS_RESERVE = 0.02;
 
 // Which pipeline stage each action draws its "available" balance from. This is the whole point of the
-// flow strip: the four actions look like they read four different numbers, but they're really one chain
-// of stages — Gateway credit → your wallet → the managed wallet → out.
+// flow strip: the actions look like they read different numbers, but they're really one chain of
+// stages — Gateway credit → your wallet → the managed wallet → out. Bridge and Send top the managed
+// wallet up from your wallet on demand (the old Deposit step, folded in), so they read the managed stage.
 type StageKey = "gateway" | "wallet" | "managed";
 const SOURCE_STAGE: Record<TabKey, StageKey> = {
   withdraw: "gateway",
-  move: "wallet",
   bridge: "managed",
   send: "managed",
 };
 
-// One widget, four money moves, switched by a segmented control at the top — the same shape wallets and
+// One widget, three money moves, switched by a segmented control at the top — the same shape wallets and
 // bridges (Across, Stargate, Uniswap) use, so a new user only ever sees one action at a time.
 export function TransfersWidget() {
   const [tab, setTab] = useState<TabKey>("withdraw");
@@ -38,7 +37,7 @@ export function TransfersWidget() {
   return (
     <div className="rounded-2xl border border-[var(--border-color)] bg-[var(--surface)]/40 p-2 sm:p-3">
       {/* segmented control */}
-      <div className="grid grid-cols-4 gap-1 rounded-xl bg-[var(--surface-2)]/50 p-1">
+      <div className="grid grid-cols-3 gap-1 rounded-xl bg-[var(--surface-2)]/50 p-1">
         {TABS.map((t) => (
           <button
             key={t.key}
@@ -60,7 +59,6 @@ export function TransfersWidget() {
 
       <div className="p-2 sm:p-3">
         {tab === "withdraw" && <WithdrawBody />}
-        {tab === "move" && <MoveBody />}
         {tab === "bridge" && <BridgeBody />}
         {tab === "send" && <SendBody />}
       </div>
@@ -165,57 +163,33 @@ function WithdrawBody() {
   );
 }
 
-function MoveBody() {
-  const { creatorBalances, treasury, sweepToTreasury, sweeping, busy } = useDemo();
-  const walletUsdc = Number(creatorBalances?.wallet.formatted ?? 0);
-  const movable = Math.max(0, walletUsdc - GAS_RESERVE);
-  if (!treasury?.configured) return <Dormant what="Deposits" />;
-  return (
-    <>
-      <Lead>
-        Deposit USDC from your wallet into the Circle managed (MPC) wallet — a real native transfer on Arc. The managed
-        wallet is the hub Circle drives the Bridge and Send steps from.
-      </Lead>
-      <ActionCard
-        from="Your wallet (Arc)"
-        to="Managed wallet (Arc)"
-        available={movable}
-        cta="Deposit"
-        busyLabel="Depositing…"
-        busy={sweeping}
-        disabled={busy}
-        emptyHint="Your wallet is empty. Withdraw your earnings first."
-        reserveNote={`${GAS_RESERVE} USDC stays in your wallet for Arc gas.`}
-        onRun={(amount) => void sweepToTreasury(amount)}
-      />
-    </>
-  );
-}
-
 function BridgeBody() {
-  const { treasury, config, bridgeToSepolia, bridging, busy } = useDemo();
+  const { creatorBalances, treasury, config, bridgeToSepolia, bridging, busy } = useDemo();
   const { address } = useAccount();
   const [manual, setManual] = useState("");
   const treasuryUsdc = treasury?.configured ? Number(treasury.usdc) : 0;
-  const bridgeable = Math.max(0, treasuryUsdc - GAS_RESERVE);
+  const walletUsdc = Number(creatorBalances?.wallet.formatted ?? 0);
+  // Bridge tops the managed wallet up from your Arc wallet first (the folded-in deposit), so what's
+  // bridgeable is the managed balance plus your wallet, each minus its own Arc-gas reserve.
+  const bridgeable = Math.max(0, treasuryUsdc + Math.max(0, walletUsdc - GAS_RESERVE) - GAS_RESERVE);
   const fallback = config?.addresses.creator ?? "";
   const effective = manual.trim() || address || fallback;
   if (!treasury?.configured) return <Dormant what="Bridging" />;
   return (
     <>
       <Lead>
-        Your Circle managed wallet burns USDC through Circle CCTP on Arc, and it mints natively on Ethereum Sepolia. A
-        real cross chain round trip.
+        Bridge pulls any USDC sitting in your Arc wallet into the Circle managed wallet, which then burns it through
+        Circle CCTP on Arc and mints natively on Ethereum Sepolia. A real cross chain round trip — one click.
       </Lead>
       <ActionCard
-        from="Managed wallet (Arc)"
+        from="Your wallet + managed (Arc)"
         to="Ethereum Sepolia"
         available={bridgeable}
         cta="Bridge it"
         busyLabel="Bridging…"
         busy={bridging}
         disabled={busy}
-        emptyHint="Managed wallet is empty. Move some USDC into it first."
+        emptyHint="Nothing to bridge. Withdraw your earnings to your wallet first."
         reserveNote={`${GAS_RESERVE} USDC stays behind for Arc gas.`}
         onRun={(amount) => void bridgeToSepolia(amount, effective)}
         footer="CCTP charges nothing on a standard transfer. You pay a little Arc gas in USDC on the burn, plus a little Sepolia ETH on the mint. Settlement takes a few minutes while Circle attests."
@@ -234,28 +208,31 @@ function BridgeBody() {
 }
 
 function SendBody() {
-  const { treasury, config, treasuryPayout, payingOut, busy } = useDemo();
+  const { creatorBalances, treasury, config, treasuryPayout, payingOut, busy } = useDemo();
   const { address } = useAccount();
   const [manual, setManual] = useState("");
   const treasuryUsdc = treasury?.configured ? Number(treasury.usdc) : 0;
+  const walletUsdc = Number(creatorBalances?.wallet.formatted ?? 0);
+  // Send tops the managed wallet up from your Arc wallet first (the folded-in deposit), then pays out.
+  const sendable = treasuryUsdc + Math.max(0, walletUsdc - GAS_RESERVE);
   const fallback = config?.addresses.creator ?? "";
   const effective = manual.trim() || address || fallback;
   if (!treasury?.configured) return <Dormant what="Sending" />;
   return (
     <>
       <Lead>
-        Pays USDC straight out of your managed wallet to any address on Arc, signed by Circle through the Console API.
-        Connect a wallet to send to yourself, or type any address.
+        Pulls any USDC from your Arc wallet into the managed wallet, then pays it straight out to any address on Arc,
+        signed by Circle through the Console API. Connect a wallet to send to yourself, or type any address.
       </Lead>
       <ActionCard
-        from="Managed wallet (Arc)"
+        from="Your wallet + managed (Arc)"
         to="Any Arc address"
-        available={treasuryUsdc}
+        available={sendable}
         cta="Send it"
         busyLabel="Sending…"
         busy={payingOut}
         disabled={busy}
-        emptyHint="Managed wallet is empty. Move some USDC into it first."
+        emptyHint="Nothing to send. Withdraw your earnings to your wallet first."
         onRun={(amount) => void treasuryPayout(amount, effective)}
       >
         <RecipientField label="Send to" manual={manual} setManual={setManual} fallback={fallback} />

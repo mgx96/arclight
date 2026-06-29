@@ -64,6 +64,20 @@ const creatorWallet = createWalletClient({ account: creatorAccount, chain: arc, 
 // Keep a little native USDC behind for gas when sweeping (Arc gas is paid in USDC).
 const SWEEP_GAS_RESERVE = parseEther("0.02");
 
+// Move the creator EOA's spare native USDC into the managed wallet (best-effort). This is the old
+// "Deposit" hop, now folded into Bridge and Send so the managed wallet is topped up on demand — the
+// user never runs it by hand. Returns the swept transfer, or null when the EOA is at/below the gas
+// reserve (nothing to move; the funds are already in the managed wallet).
+async function autoSweepToTreasury(): Promise<{ amount: string; to: `0x${string}`; txHash: `0x${string}` } | null> {
+  const t = await treasury.provision();
+  const bal = await arcPublic.getBalance({ address: creatorAccount.address });
+  if (bal <= SWEEP_GAS_RESERVE) return null;
+  const value = bal - SWEEP_GAS_RESERVE;
+  const txHash = await creatorWallet.sendTransaction({ to: t.address as `0x${string}`, value });
+  await arcPublic.waitForTransactionReceipt({ hash: txHash });
+  return { amount: formatEther(value), to: t.address as `0x${string}`, txHash };
+}
+
 // ---- Anti-double-pay ledger (in-memory; the demo's stand-in for the on-chain nullifier set) ---
 const consumedNullifiers = new Set<string>();
 type Receipt = {
@@ -273,6 +287,8 @@ app.post("/creator/treasury/payout", async (req, res) => {
   if (!HAS_CIRCLE_CREDS) return res.status(503).json({ error: "Circle treasury not configured" });
   try {
     const destination = (typeof req.body?.destination === "string" ? req.body.destination : ENV.creatorAddress) as `0x${string}`;
+    // Top the managed wallet up from the creator EOA first (the old Deposit step, folded in).
+    const swept = await autoSweepToTreasury();
     const bal = await treasury.getBalance();
     const explicit = req.body?.amount !== undefined;
     const amount = explicit ? String(req.body.amount) : bal.usdc;
@@ -281,7 +297,7 @@ app.post("/creator/treasury/payout", async (req, res) => {
     }
     const { id } = await treasury.payout({ destinationAddress: destination, amount });
     const settled = await treasury.waitForTransaction(id);
-    res.json({ paidOut: true, circleTxId: id, state: settled.state, txHash: settled.txHash, amount, destination });
+    res.json({ paidOut: true, swept, circleTxId: id, state: settled.state, txHash: settled.txHash, amount, destination });
   } catch (err) {
     if (err instanceof TreasuryDisabledError) return res.status(503).json({ error: "Circle treasury not configured" });
     res.status(502).json({ error: "treasury payout failed", detail: String(err) });
@@ -295,6 +311,8 @@ const BRIDGE_GAS_RESERVE = 0.02;
 app.post("/creator/bridge", async (req, res) => {
   if (!HAS_CIRCLE_CREDS) return res.status(503).json({ error: "Circle treasury not configured" });
   try {
+    // Top the managed wallet up from the creator EOA first (the old Deposit step, folded in).
+    const swept = await autoSweepToTreasury();
     const bal = Number((await treasury.getBalance()).usdc);
     const spendable = Math.floor((bal - BRIDGE_GAS_RESERVE) * 1e6) / 1e6;
     const requested = req.body?.amount !== undefined ? Number(req.body.amount) : Math.min(0.1, spendable);
@@ -316,7 +334,7 @@ app.post("/creator/bridge", async (req, res) => {
       recipient = req.body.recipient as `0x${string}`;
     }
     const result = await bridgeToSepolia(requested.toFixed(6), recipient);
-    res.json({ bridged: true, ...result });
+    res.json({ bridged: true, swept, ...result });
   } catch (err) {
     if (err instanceof TreasuryDisabledError) return res.status(503).json({ error: "Circle treasury not configured" });
     res.status(502).json({ error: "bridge failed", detail: String(err) });

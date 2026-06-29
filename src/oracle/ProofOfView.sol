@@ -15,9 +15,7 @@ import {IViewPrivacyVerifier} from "../interfaces/IViewPrivacyVerifier.sol";
  * @dev Attestations are EIP712 signed by a trusted off chain metering service. The viewer is only referenced by a
  * hiding commitment so their identity never hits the public chain. When a privacy verifier is configured we also demand
  * a zero knowledge proof and burn a nullifier, so a viewer is counted at most once per campaign and epoch without us
- * ever learning who they are. This viewer anonymity and anti sybil gate is its own layer, complementary to Arc
- * Configurable Privacy rather than replaced by it: Arc Configurable Privacy hides transfer amounts at settlement, while
- * this hides viewer identity and enforces the one per viewer uniqueness a confidential transfer feature cannot express.
+ * ever learning who they are.
  */
 contract ProofOfView is IProofOfView, Ownable, EIP712 {
     error ProofOfView__ZeroAddress();
