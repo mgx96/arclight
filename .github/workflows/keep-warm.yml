@@ -1,0 +1,29 @@
+name: Keep backend warm
+
+# The backend runs on Render's free plan, which sleeps the container after ~15 minutes of no
+# traffic. The first request after it sleeps then takes ~40s (cold start), during which the demo
+# UI shows "offline / can't reach settlement". This workflow pings /health every ~10 minutes so
+# the container never sleeps and the demo is always instantly responsive.
+#
+# Note: GitHub's scheduler runs on a best-effort basis and can be delayed by several minutes under
+# load, and it disables scheduled workflows after 60 days of repository inactivity. Both are fine
+# for a testnet demo. Override the target via the BACKEND_URL repo variable if the URL changes.
+
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping backend health endpoint
+        run: |
+          URL="${{ vars.BACKEND_URL || 'https://arclight-backend.onrender.com' }}/health"
+          echo "Pinging $URL"
+          # Generous timeout so the wake-up (cold start) itself counts as success, plus a couple
+          # of retries in case Render is mid-restart.
+          curl -fsS --retry 3 --retry-delay 15 --retry-all-errors --max-time 90 "$URL"
+          echo
+          echo "Backend is awake."
