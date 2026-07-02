@@ -8,7 +8,7 @@ import { WalletConnect } from "./WalletConnect";
 import { useDemo } from "./demo-store";
 
 const LINKS = [
-  { href: "/", label: "Dashboard" },
+  { href: "/demo", label: "Dashboard" },
   { href: "/creator", label: "Transfers" },
   { href: "/history", label: "History" },
 ];
@@ -20,9 +20,10 @@ export function TopNav() {
   return (
     <header className="sticky top-0 z-20 border-b border-[var(--border-color)] bg-[var(--background)]/80 backdrop-blur">
       <div className="mx-auto flex w-full max-w-6xl items-center gap-6 px-6 py-3">
-        <Link href="/" className="leading-none" aria-label="Arclight home">
+        {/* Full-page link to the static marketing landing served at / (outside the App Router). */}
+        <a href="/" className="leading-none" aria-label="Arclight home">
           <Wordmark size="text-2xl" glow beam />
-        </Link>
+        </a>
 
         <nav className="hidden items-center gap-1 md:flex">
           {LINKS.map((l) => {

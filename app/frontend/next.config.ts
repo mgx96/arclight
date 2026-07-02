@@ -12,6 +12,16 @@ const nextConfig: NextConfig = {
   ...(basePath ? { basePath, assetPrefix: basePath } : {}),
   trailingSlash: true,
   images: { unoptimized: true },
+  // Serve the static marketing landing page (public/home.html) at the root. The demo dashboard
+  // lives at /demo. Rewrites aren't supported by `output: "export"`, so only wire this up for the
+  // normal (Vercel) build; the GitHub Pages static export doesn't need it.
+  ...(staticExport
+    ? {}
+    : {
+        async rewrites() {
+          return [{ source: "/", destination: "/home.html" }];
+        },
+      }),
 };
 
 export default nextConfig;
