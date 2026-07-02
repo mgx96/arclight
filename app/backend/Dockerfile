@@ -1,7 +1,7 @@
 # Arclight backend — proof-of-view attestor + Circle Gateway nanopayment agent.
 # Runs the TypeScript server directly via tsx (no separate build step). Testnet secrets are
 # injected at runtime as environment variables by the host (Render/Railway/Fly), never baked in.
-FROM node:22-slim
+FROM node:24-slim
 
 # pnpm via corepack (version pinned to the one used locally).
 ENV PNPM_HOME=/usr/local/bin
