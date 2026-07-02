@@ -1,8 +1,13 @@
 // Typed client for the Arclight backend (attestor + Circle Gateway nanopayment agent).
 import { createMockApi } from "./api.mock";
 
+// Default to the same-origin proxy path (/api/backend/*, forwarded to the backend by a Next.js
+// rewrite — see next.config.ts). Calling the backend same-origin instead of cross-origin to
+// *.onrender.com sidesteps browser ad/privacy blockers, which otherwise blocked the requests with
+// ERR_BLOCKED_BY_CLIENT and left the demo stuck "offline". Local dev overrides this with
+// NEXT_PUBLIC_BACKEND_URL=http://localhost:8787 in .env.local to hit a local backend directly.
 const BASE =
-  process.env.NEXT_PUBLIC_BACKEND_URL?.replace(/\/$/, "") ?? "http://localhost:8787";
+  process.env.NEXT_PUBLIC_BACKEND_URL?.replace(/\/$/, "") ?? "/api/backend";
 
 export type BackendConfig = {
   chain: { id: number; caip2: string; rpcUrl: string };

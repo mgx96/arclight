@@ -18,9 +18,14 @@ export const arcTestnet = defineChain({
   testnet: true,
 });
 
+// Read the Arc RPC through the same-origin proxy (/api/rpc, see next.config.ts) by default so
+// browser ad/privacy blockers can't block the on-chain attestor read. Local dev or an alternate
+// keyed RPC can override with NEXT_PUBLIC_RPC_URL.
+const RPC_URL = process.env.NEXT_PUBLIC_RPC_URL ?? "/api/rpc";
+
 export const publicClient = createPublicClient({
   chain: arcTestnet,
-  transport: http(),
+  transport: http(RPC_URL),
 });
 
 // Deployed + verified Arclight contracts on Arc testnet.

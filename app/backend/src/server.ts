@@ -111,11 +111,26 @@ app.set("trust proxy", 1);
 // CORS: when ALLOWED_ORIGINS is set, only those browser origins may call the API; otherwise allow all
 // (local-dev convenience). Requests with no Origin header (curl, server-to-server, health checks) are
 // always allowed since they aren't subject to the browser same-origin policy.
+//
+// Allowlist entries may contain a "*" wildcard so a single entry can cover a whole hosting namespace.
+// Vercel serves one app under several hostnames (the production alias plus per-deployment preview URLs
+// like arclight-<hash>.vercel.app), so "https://*.vercel.app" matches them all. The "*" matches a
+// single host label (no dots), and each pattern is fully anchored so it can't be spoofed by a longer
+// hostname (e.g. "https://*.vercel.app" will not match "evil.vercel.app.attacker.com").
 const allowlist = ENV.allowedOrigins;
+const originMatchers = allowlist.map((pattern) => {
+  if (!pattern.includes("*")) return (origin: string) => origin === pattern;
+  const rx = new RegExp(
+    "^" + pattern.split("*").map((s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("[^.]+") + "$"
+  );
+  return (origin: string) => rx.test(origin);
+});
 app.use(
   cors({
     origin(origin, cb) {
-      if (!origin || allowlist.length === 0 || allowlist.includes(origin)) return cb(null, true);
+      if (!origin || allowlist.length === 0 || originMatchers.some((m) => m(origin))) {
+        return cb(null, true);
+      }
       cb(new Error(`origin not allowed: ${origin}`));
     },
   })

@@ -153,53 +153,69 @@ export function DemoProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   // Boot: confirm backend, load config, read the on-chain attestor and compare to the signer.
+  // The backend runs on a free host that sleeps when idle, so the first request after a cold start
+  // can be slow or fail. Retry on a fixed interval instead of latching to "offline" forever, so the
+  // demo self-heals once the backend wakes up — no manual page reload needed.
   useEffect(() => {
     let cancelled = false;
-    (async () => {
-      try {
-        await api.health();
-        if (cancelled) return;
-        setBackendUp(true);
-        const cfg = await api.config();
-        if (cancelled) return;
-        setConfig(cfg);
-        push("info", SHOWCASE
-          ? `Demo mode · simulated settlement · agent ${cfg.addresses.agent.slice(0, 8)}… · price ${cfg.viewPrice} per view`
-          : `Backend live · agent ${cfg.addresses.agent.slice(0, 8)}… · price ${cfg.viewPrice} per view`);
 
-        await refresh();
+    const bootOnce = async () => {
+      await api.health();
+      if (cancelled) return;
+      setBackendUp(true);
+      const cfg = await api.config();
+      if (cancelled) return;
+      setConfig(cfg);
+      push("info", SHOWCASE
+        ? `Demo mode · simulated settlement · agent ${cfg.addresses.agent.slice(0, 8)}… · price ${cfg.viewPrice} per view`
+        : `Backend live · agent ${cfg.addresses.agent.slice(0, 8)}… · price ${cfg.viewPrice} per view`);
 
-        // The showcase has no live RPC; treat the attestor as trusted so the panel reads normally.
-        if (SHOWCASE) {
+      await refresh();
+
+      // The showcase has no live RPC; treat the attestor as trusted so the panel reads normally.
+      if (SHOWCASE) {
+        if (cancelled) return;
+        setOnchainAttestor(cfg.addresses.attestor);
+        setAttestorTrusted(true);
+        push("good", "Onchain ProofOfView trusts this attestor ✓ (simulated)");
+      } else {
+        try {
+          const onchain = (await publicClient.readContract({
+            address: CONTRACTS.ProofOfView,
+            abi: PROOF_OF_VIEW_ABI,
+            functionName: "getAttestor",
+          })) as string;
           if (cancelled) return;
-          setOnchainAttestor(cfg.addresses.attestor);
-          setAttestorTrusted(true);
-          push("good", "Onchain ProofOfView trusts this attestor ✓ (simulated)");
-        } else {
-          try {
-            const onchain = (await publicClient.readContract({
-              address: CONTRACTS.ProofOfView,
-              abi: PROOF_OF_VIEW_ABI,
-              functionName: "getAttestor",
-            })) as string;
-            if (cancelled) return;
-            setOnchainAttestor(onchain);
-            const trusted = onchain.toLowerCase() === cfg.addresses.attestor.toLowerCase();
-            setAttestorTrusted(trusted);
-            push(trusted ? "good" : "bad", trusted
-              ? `Onchain ProofOfView trusts this attestor ✓`
-              : `Warning: onchain attestor ${onchain.slice(0, 8)}… ≠ signer`);
-          } catch {
-            if (!cancelled) push("bad", "Could not read onchain attestor (RPC).");
-          }
+          setOnchainAttestor(onchain);
+          const trusted = onchain.toLowerCase() === cfg.addresses.attestor.toLowerCase();
+          setAttestorTrusted(trusted);
+          push(trusted ? "good" : "bad", trusted
+            ? `Onchain ProofOfView trusts this attestor ✓`
+            : `Warning: onchain attestor ${onchain.slice(0, 8)}… ≠ signer`);
+        } catch {
+          if (!cancelled) push("bad", "Could not read onchain attestor (RPC).");
         }
-      } catch {
-        if (!cancelled) {
+      }
+    };
+
+    (async () => {
+      let announced = false;
+      while (!cancelled) {
+        try {
+          await bootOnce();
+          return;
+        } catch {
+          if (cancelled) return;
           setBackendUp(false);
-          push("bad", "Can't reach the settlement service right now. Retrying shortly.");
+          if (!announced) {
+            push("bad", "Can't reach the settlement service (it may be waking up). Retrying…");
+            announced = true;
+          }
+          await new Promise((r) => setTimeout(r, 5000));
         }
       }
     })();
+
     return () => {
       cancelled = true;
     };
