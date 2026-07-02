@@ -12,6 +12,7 @@
 // already been paid. This mirrors what ProofOfView.consume() enforces on-chain for the splitter path.
 import express from "express";
 import cors from "cors";
+import { rateLimit } from "express-rate-limit";
 import { GatewayClient } from "@circle-fin/x402-batching/client";
 import { createGatewayMiddleware } from "@circle-fin/x402-batching/server";
 import { createPublicClient, createWalletClient, http, defineChain, parseEther, formatEther, isAddress } from "viem";
@@ -102,8 +103,47 @@ const gateway = createGatewayMiddleware({
 });
 
 const app = express();
-app.use(cors());
+
+// Behind a hosting proxy (Render/Railway/etc.) the client IP is in X-Forwarded-For; trust one hop so
+// the rate limiter keys on the real caller rather than the proxy. Safe for a single reverse proxy.
+app.set("trust proxy", 1);
+
+// CORS: when ALLOWED_ORIGINS is set, only those browser origins may call the API; otherwise allow all
+// (local-dev convenience). Requests with no Origin header (curl, server-to-server, health checks) are
+// always allowed since they aren't subject to the browser same-origin policy.
+const allowlist = ENV.allowedOrigins;
+app.use(
+  cors({
+    origin(origin, cb) {
+      if (!origin || allowlist.length === 0 || allowlist.includes(origin)) return cb(null, true);
+      cb(new Error(`origin not allowed: ${origin}`));
+    },
+  })
+);
 app.use(express.json());
+
+// Rate limiting (per client IP, fixed window). A generous global limit protects read endpoints; a
+// tighter limit guards the money-moving writes so a single visitor cannot drain the shared testnet
+// wallets or exhaust the Circle API quota.
+const readLimiter = rateLimit({
+  windowMs: ENV.rateWindowMs,
+  max: ENV.rateMaxRead,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "rate limit exceeded — slow down" },
+});
+const writeLimiter = rateLimit({
+  windowMs: ENV.rateWindowMs,
+  max: ENV.rateMaxWrite,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "rate limit exceeded — too many actions, try again shortly" },
+});
+app.use(readLimiter); // baseline for every request
+// writeLimiter is attached per-route below, only to the external money-moving POST endpoints. It is
+// deliberately NOT applied to GET /creator/view: that endpoint is called server-to-server by the
+// agent during payment (from this same host), so an IP-based cap there would throttle the demo's own
+// settlement flow. Gating /attest and /agent/pay-view already bounds how often views can be paid.
 
 // The paid resource. Reaching the handler body means Circle settled the nanopayment to the creator.
 app.get("/creator/view", gateway.require(ENV.viewPrice), (req, res) => {
@@ -173,7 +213,7 @@ app.get("/creator/balances", async (_req, res) => {
 
 // Settle the creator's Gateway-credited earnings to its on-chain wallet. Same-chain withdraw is
 // instant (no 7-day delay). Defaults to the full available balance.
-app.post("/creator/withdraw", async (req, res) => {
+app.post("/creator/withdraw", writeLimiter, async (req, res) => {
   try {
     const balances = await creator.getBalances();
     const available = Number(balances.gateway.formattedAvailable);
@@ -256,7 +296,7 @@ app.get("/creator/treasury", async (_req, res) => {
 
 // Sweep the creator EOA's native-USDC earnings into the Circle treasury wallet (on-chain transfer).
 // Defaults to the full balance minus a small gas reserve.
-app.post("/creator/sweep-to-treasury", async (req, res) => {
+app.post("/creator/sweep-to-treasury", writeLimiter, async (req, res) => {
   if (!HAS_CIRCLE_CREDS) return res.status(503).json({ error: "Circle treasury not configured" });
   try {
     const t = await treasury.provision();
@@ -283,7 +323,7 @@ app.post("/creator/sweep-to-treasury", async (req, res) => {
 
 // Pay USDC out of the Circle treasury via Circle's Console-signed createTransaction. Defaults to
 // sending the full treasury balance back to the creator's operating EOA.
-app.post("/creator/treasury/payout", async (req, res) => {
+app.post("/creator/treasury/payout", writeLimiter, async (req, res) => {
   if (!HAS_CIRCLE_CREDS) return res.status(503).json({ error: "Circle treasury not configured" });
   try {
     const destination = (typeof req.body?.destination === "string" ? req.body.destination : ENV.creatorAddress) as `0x${string}`;
@@ -308,7 +348,7 @@ app.post("/creator/treasury/payout", async (req, res) => {
 // Programmable Wallets API. Full round-trip: burn on Arc, Circle attestation, mint on Sepolia.
 // Leave a little USDC behind in the managed wallet to cover Arc gas (gas is paid in USDC on Arc).
 const BRIDGE_GAS_RESERVE = 0.02;
-app.post("/creator/bridge", async (req, res) => {
+app.post("/creator/bridge", writeLimiter, async (req, res) => {
   if (!HAS_CIRCLE_CREDS) return res.status(503).json({ error: "Circle treasury not configured" });
   try {
     // Top the managed wallet up from the creator EOA first (the old Deposit step, folded in).
@@ -347,7 +387,7 @@ app.get("/creator/bridge/meta", (_req, res) => {
 });
 
 // ---- Attestor: mint a signed proof for a (claimed) genuine view -----------------------------
-app.post("/attest", async (req, res) => {
+app.post("/attest", writeLimiter, async (req, res) => {
   try {
     const { advertiser, creator, campaignId, weight, viewerSecret, ttlSeconds } = req.body ?? {};
     if (!advertiser || !creator || campaignId === undefined || weight === undefined || !viewerSecret) {
@@ -371,7 +411,7 @@ app.post("/attest", async (req, res) => {
 });
 
 // ---- Agent: verify proof, then pay the creator via a real nanopayment ------------------------
-app.post("/agent/pay-view", async (req, res) => {
+app.post("/agent/pay-view", writeLimiter, async (req, res) => {
   const { attestation: aJson, signature } = (req.body ?? {}) as {
     attestation?: ViewAttestationJson;
     signature?: `0x${string}`;
@@ -428,6 +468,17 @@ app.post("/agent/pay-view", async (req, res) => {
     consumedNullifiers.delete(nk); // payment failed — release the nullifier so it can be retried
     res.status(502).json({ error: "nanopayment failed", detail: String(err) });
   }
+});
+
+// Final error handler. Keeps rejected-CORS and other thrown errors from leaking a stack trace to
+// the client; returns a clean JSON status instead. Must be last, with the 4-arg signature Express
+// recognizes as an error handler.
+app.use((err: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
+  if (err?.message?.startsWith("origin not allowed")) {
+    return res.status(403).json({ error: "origin not allowed" });
+  }
+  console.error("unhandled error:", err);
+  res.status(500).json({ error: "internal error" });
 });
 
 app.listen(ENV.port, () => {

@@ -46,6 +46,17 @@ export const ENV = {
   // generate there, plus an entity secret you register via `pnpm circle:gen` / `pnpm circle:register`.
   circleApiKey: process.env.CIRCLE_API_KEY?.trim() || undefined,
   circleEntitySecret: process.env.CIRCLE_ENTITY_SECRET?.trim() || undefined,
+  // Comma-separated list of browser origins allowed to call this backend (e.g.
+  // "https://app.arclight.xyz,https://arclight.xyz"). Empty means allow-all, which is
+  // fine for local dev but should always be set in a public deployment.
+  allowedOrigins: (process.env.ALLOWED_ORIGINS ?? "")
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean),
+  // Fixed-window rate limits (per client IP). Overridable via env for tuning in production.
+  rateWindowMs: Number(process.env.RATE_WINDOW_MS ?? 60_000),
+  rateMaxRead: Number(process.env.RATE_MAX_READ ?? 120), // GET/read endpoints per window
+  rateMaxWrite: Number(process.env.RATE_MAX_WRITE ?? 20), // money-moving writes per window
 };
 
 // True only when both Circle Console credentials are present, so the treasury feature can light up.

@@ -1,0 +1,47 @@
+# Render blueprint for the Arclight backend (attestor + Circle Gateway nanopayment agent).
+# Deploy: push to GitHub, then in Render → New → Blueprint, point at this repo. Render builds the
+# Docker image in app/backend and runs it as a web service. The same Dockerfile also runs on
+# Railway or Fly.io if you prefer those hosts.
+#
+# TESTNET ONLY. The private keys below are throwaway Arc-testnet keys. Never put mainnet keys here.
+services:
+  - type: web
+    name: arclight-backend
+    runtime: docker
+    rootDir: app/backend
+    dockerfilePath: ./Dockerfile
+    plan: starter
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      # --- Secrets: set these in the Render dashboard (sync:false = not stored in git) ---
+      - key: AGENT_PRIVATE_KEY
+        sync: false
+      - key: ATTESTOR_PRIVATE_KEY
+        sync: false
+      - key: CREATOR_PRIVATE_KEY
+        sync: false
+      # Circle Programmable Wallets (optional — enables the treasury payout + CCTP bridge features).
+      - key: CIRCLE_API_KEY
+        sync: false
+      - key: CIRCLE_ENTITY_SECRET
+        sync: false
+      # --- Public config ---
+      - key: CREATOR_ADDRESS
+        sync: false # the creator EOA's public address (not a secret, but deployment-specific)
+      - key: VIEW_PRICE
+        value: "$0.01"
+      # Lock browser access to your deployed frontend origin(s). Comma-separated, no trailing slash.
+      # e.g. https://arclight.xyz,https://app.arclight.xyz
+      - key: ALLOWED_ORIGINS
+        sync: false
+      # Rate limits (per client IP, fixed window). Defaults are sensible for a public demo.
+      - key: RATE_WINDOW_MS
+        value: "60000"
+      - key: RATE_MAX_READ
+        value: "120"
+      - key: RATE_MAX_WRITE
+        value: "20"
+      # Optional: keyed Arc RPC. Leave unset to use the public testnet RPC.
+      - key: ARC_TESTNET_RPC_URL
+        sync: false

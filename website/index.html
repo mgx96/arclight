@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Arclight — The ad rail for the crypto media economy</title>
+<meta name="description" content="Arclight settles every verified video view in USDC on Circle's Arc L1. The stablecoin-native ad rail for the crypto media economy." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@500;600;700&family=Poppins:wght@500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+<script>(function(){try{var s=localStorage.getItem('arclight-theme');if(s)document.documentElement.setAttribute('data-theme',s);}catch(e){}})();</script>
+<style>
+/* ============ Theme tokens ============ */
+:root{
+  --bg:#ffffff; --bg-2:#f7f8fa; --ink:#0f1729; --muted:#5b6577;
+  --soft:#f6f7f9; --card:#ffffff; --line:#e9ecf1; --line-strong:#dde2ea;
+  --amber:#e08c00; --amber-2:#e8542b; --btn-ink:#1c1400;
+  --chip-bg:#fff6e6; --chip-border:#f6e2b8; --chip-text:#a6720a; --ghost-border:#e4e7ee;
+  --glow:rgba(224,140,0,.16); --card-shadow:0 20px 50px rgba(15,23,41,.07);
+}
+[data-theme="dark"]{
+  --bg:#0b1220; --bg-2:#0a0f1a; --ink:#eaf0f8; --muted:#8593a8;
+  --soft:rgba(255,255,255,.035); --card:rgba(255,255,255,.03); --line:rgba(255,255,255,.09); --line-strong:rgba(255,255,255,.16);
+  --amber:#ffb020; --amber-2:#ff7a3d; --btn-ink:#151007;
+  --chip-bg:rgba(255,176,32,.08); --chip-border:rgba(255,176,32,.28); --chip-text:#e6c07a; --ghost-border:rgba(255,255,255,.14);
+  --glow:rgba(255,138,50,.22); --card-shadow:0 24px 60px rgba(0,0,0,.5);
+}
+
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{font-family:"Inter",system-ui,sans-serif;background:var(--bg);color:var(--ink);line-height:1.55;-webkit-font-smoothing:antialiased;overflow-x:hidden;transition:background .25s ease,color .25s ease}
+a{color:inherit;text-decoration:none}
+.wrap{width:100%;max-width:1120px;margin:0 auto;padding:0 30px}
+.accent{color:var(--amber)}
+
+/* ============ Brand / logo (approved) ============ */
+.brand{position:relative;display:inline-block;line-height:1;text-decoration:none}
+.brand .wm{position:relative;display:inline-flex;align-items:baseline;line-height:1;font-family:"Geist",sans-serif;font-weight:600;font-size:32px;letter-spacing:-0.025em;color:var(--ink)}
+.brand .wm .mark{height:0.82em;width:auto;transform:translateY(0.04em)}
+.brand .wm .mark path{fill:var(--amber);fill-rule:evenodd}
+.brand .wm .rcl{margin-left:-0.02em}
+.brand .wm .i{position:relative;display:inline-block}
+.brand .wm .i .pd{position:absolute;left:50%;top:0.06em;transform:translateX(-50%);height:0.2em;width:0.2em}
+.brand .wm .i .pd path{fill:var(--amber)}
+.brand .wm .beam{position:absolute;left:0.04em;right:0.04em;bottom:-0.14em;height:2px;pointer-events:none;background:linear-gradient(to right,transparent,var(--amber),transparent)}
+
+/* ============ Buttons ============ */
+.btn{display:inline-flex;align-items:center;gap:8px;cursor:pointer;font-family:inherit;font-weight:600;font-size:15px;letter-spacing:-0.01em;padding:13px 22px;border-radius:11px;border:1px solid transparent;transition:transform .15s ease,box-shadow .2s ease,background .2s ease,border-color .2s ease,color .2s ease;white-space:nowrap}
+.btn:active{transform:translateY(1px) scale(.99)}
+.btn-primary{background:var(--amber);color:var(--btn-ink);font-weight:600;box-shadow:0 10px 26px -14px var(--glow)}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 16px 34px -14px var(--glow)}
+.btn-ghost{background:transparent;color:var(--ink);border-color:var(--ghost-border)}
+.btn-ghost:hover{border-color:var(--amber);color:var(--amber);transform:translateY(-2px)}
+.btn-sm{padding:10px 18px;font-size:14px;border-radius:9px}
+.btn-lg{padding:14px 26px;font-size:15px}
+
+/* ============ Nav ============ */
+header.nav-bar{position:relative;z-index:100;background:var(--bg);border-bottom:1px solid var(--line)}
+.nav-inner{display:flex;align-items:center;justify-content:space-between;height:76px}
+.nav-links{display:flex;align-items:center;gap:30px}
+.nav-links a.navlink{font-size:15px;color:var(--muted);font-weight:500;transition:color .2s ease}
+.nav-links a.navlink:hover{color:var(--ink)}
+.nav-actions{display:flex;align-items:center;gap:12px}
+.theme-toggle{width:38px;height:38px;border-radius:9px;border:1px solid var(--line-strong);background:transparent;color:var(--ink);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;transition:color .2s,border-color .2s}
+.theme-toggle:hover{color:var(--amber);border-color:var(--amber)}
+.theme-toggle svg{width:18px;height:18px}
+.theme-toggle .sun{display:none}.theme-toggle .moon{display:block}
+[data-theme="dark"] .theme-toggle .sun{display:block}[data-theme="dark"] .theme-toggle .moon{display:none}
+
+/* ============ Hero ============ */
+.hero{position:relative;padding:64px 0 84px;overflow:hidden}
+.hero-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:56px;align-items:center}
+.chip{display:inline-flex;gap:8px;align-items:center;background:var(--chip-bg);border:1px solid var(--chip-border);border-radius:100px;padding:7px 14px;font-size:13px;color:var(--chip-text);font-weight:600;margin-bottom:24px}
+.chip .d{width:7px;height:7px;border-radius:50%;background:#22a355;box-shadow:0 0 0 0 rgba(34,163,85,.5);animation:pulse 2.2s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(34,163,85,.45)}70%{box-shadow:0 0 0 8px transparent}100%{box-shadow:0 0 0 0 transparent}}
+h1.hero-title{font-family:"Poppins",sans-serif;font-size:clamp(42px,5.4vw,64px);font-weight:800;letter-spacing:-0.03em;line-height:1.05}
+h1.hero-title .a{color:var(--amber)}
+.hero-lead{color:var(--muted);font-size:18px;max-width:500px;margin:22px 0 32px}
+.hero-cta{display:flex;gap:14px;flex-wrap:wrap;align-items:center}
+
+/* settlement feed panel */
+.panel-feed{background:var(--soft);border:1px solid var(--line);border-radius:20px;padding:24px;box-shadow:var(--card-shadow)}
+.panel-feed .ph{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:16px}
+.panel-feed .ph .live{color:var(--amber);font-weight:600;display:inline-flex;align-items:center;gap:6px}
+.panel-feed .ph .live .dot{width:6px;height:6px;border-radius:50%;background:var(--amber);animation:pulse2 1.8s infinite}
+@keyframes pulse2{0%,100%{opacity:1}50%{opacity:.35}}
+.feed{display:flex;flex-direction:column;gap:10px}
+.item{display:flex;justify-content:space-between;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:13px 15px;transition:border-color .2s}
+.item .l{font-size:13px;color:var(--muted)}
+.item .l b{display:block;color:var(--ink);font-size:14px;font-weight:600;font-family:"Inter"}
+.item .v{font-family:"Poppins";font-weight:700;color:var(--amber);font-size:16px}
+
+/* ============ Tech strip (static) ============ */
+.techstrip{border-top:1px solid var(--line);border-bottom:1px solid var(--line);background:var(--bg-2)}
+.techstrip-inner{display:flex;flex-wrap:wrap;justify-content:center;gap:12px;padding:26px 0}
+.ts-item{display:inline-flex;align-items:center;gap:9px;font-size:13px;color:var(--muted);font-weight:500;white-space:nowrap;padding:9px 15px;border:1px solid var(--line);border-radius:100px;background:var(--card);transition:border-color .2s,color .2s}
+.ts-item:hover{border-color:var(--amber);color:var(--ink)}
+.ts-item .d{width:6px;height:6px;border-radius:50%;background:var(--amber)}
+
+/* ============ Sections ============ */
+section{position:relative}
+.section-pad{padding:100px 0}
+.section-head{max-width:680px;margin-bottom:52px}
+.kicker{font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--amber);font-weight:600}
+.section-head h2{font-family:"Poppins",sans-serif;font-size:clamp(29px,4.2vw,46px);line-height:1.08;letter-spacing:-0.03em;font-weight:800;margin-top:14px}
+.section-head p{color:var(--muted);font-size:18px;margin-top:16px}
+
+/* problem cards */
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.card{background:var(--soft);border:1px solid var(--line);border-radius:18px;padding:28px;transition:transform .2s ease,border-color .2s ease,box-shadow .2s ease}
+.card:hover{transform:translateY(-4px);border-color:var(--line-strong);box-shadow:var(--card-shadow)}
+.card .idx{font-family:"Poppins";font-weight:700;font-size:13px;color:var(--amber);letter-spacing:.04em}
+.card h3{font-family:"Poppins";font-size:19px;font-weight:700;letter-spacing:-0.02em;margin:12px 0 9px}
+.card p{color:var(--muted);font-size:15px}
+
+/* how it works */
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:0;position:relative}
+.step{padding:24px 22px 24px 0;position:relative}
+.step .num{width:44px;height:44px;border-radius:12px;display:inline-flex;align-items:center;justify-content:center;font-family:"Poppins";font-weight:700;font-size:15px;color:var(--amber);background:var(--chip-bg);border:1px solid var(--chip-border);margin-bottom:16px}
+.step h4{font-family:"Poppins";font-size:17px;font-weight:700;letter-spacing:-0.02em;margin-bottom:7px}
+.step p{color:var(--muted);font-size:14px}
+.step:not(:last-child)::after{content:"";position:absolute;top:46px;right:22px;width:22px;height:1px;background:linear-gradient(90deg,var(--line-strong),transparent)}
+
+/* features */
+.grid-feat{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.feat{background:var(--soft);border:1px solid var(--line);border-radius:18px;padding:26px;transition:transform .2s,border-color .2s}
+.feat:hover{transform:translateY(-4px);border-color:var(--line-strong)}
+.feat .ico{width:46px;height:46px;border-radius:12px;display:inline-flex;align-items:center;justify-content:center;background:var(--chip-bg);color:var(--amber);margin-bottom:16px}
+.feat .ico svg{width:22px;height:22px}
+.feat h4{font-family:"Poppins";font-size:17px;font-weight:700;letter-spacing:-0.02em;margin-bottom:7px}
+.feat p{color:var(--muted);font-size:14px}
+
+/* stats */
+.stats-band{background:var(--bg-2);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;padding:72px 0}
+.stat .val{font-family:"Poppins";font-size:clamp(44px,6vw,66px);font-weight:800;letter-spacing:-0.04em;line-height:1}
+.stat .val .u{color:var(--amber)}
+.stat .lbl{color:var(--muted);font-size:15px;margin-top:12px}
+
+/* contracts */
+.contracts-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+.contract-row{display:flex;align-items:center;justify-content:space-between;gap:16px;background:var(--soft);border:1px solid var(--line);border-radius:14px;padding:18px 20px;transition:border-color .2s,transform .2s,box-shadow .2s}
+.contract-row:hover{border-color:var(--amber);transform:translateY(-2px);box-shadow:var(--card-shadow)}
+.contract-meta{min-width:0}
+.contract-meta .cn{font-weight:700;font-size:15px;letter-spacing:-0.01em;font-family:"Poppins"}
+.contract-meta .cr{color:var(--muted);font-size:11px;font-weight:500}
+.contract-meta .ca{font-family:ui-monospace,monospace;font-size:12px;color:var(--muted);margin-top:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.contract-links{display:flex;gap:8px;flex-shrink:0}
+.pill{font-family:ui-monospace,monospace;font-size:11px;letter-spacing:.04em;color:var(--muted);border:1px solid var(--line-strong);border-radius:8px;padding:6px 10px;transition:color .2s,border-color .2s}
+.pill:hover{color:var(--amber);border-color:var(--amber)}
+.contracts-foot{margin-top:24px;display:flex;flex-wrap:wrap;gap:14px 30px;align-items:center;font-size:14px;color:var(--muted)}
+.contracts-foot b{color:var(--ink)}
+.contracts-foot .mono{font-family:ui-monospace,monospace}
+.contracts-foot a:hover{color:var(--amber)}
+
+/* split panels */
+.split{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.panel{background:var(--soft);border:1px solid var(--line);border-radius:20px;padding:36px}
+.panel .kicker{display:block;margin-bottom:16px}
+.panel h3{font-family:"Poppins";font-size:25px;font-weight:800;letter-spacing:-0.03em;margin-bottom:18px}
+.panel ul{list-style:none}
+.panel li{display:flex;gap:12px;padding:11px 0;border-top:1px solid var(--line);color:var(--muted);font-size:15px}
+.panel li:first-child{border-top:none}
+.panel li .ck{color:var(--amber);flex-shrink:0;font-weight:700}
+
+/* CTA band */
+.cta-band{padding:92px 0}
+.cta-inner{background:var(--soft);border:1px solid var(--line);border-radius:26px;padding:64px 40px;text-align:center;position:relative;overflow:hidden}
+.cta-inner::before{content:"";position:absolute;inset:0;background:radial-gradient(ellipse 60% 100% at 50% 0%,var(--glow),transparent 70%);pointer-events:none}
+.cta-inner h2{position:relative;font-family:"Poppins";font-size:clamp(29px,4.2vw,48px);font-weight:800;letter-spacing:-0.03em;line-height:1.06}
+.cta-inner p{position:relative;color:var(--muted);font-size:18px;margin:16px auto 32px;max-width:540px}
+.cta-inner .hero-cta{position:relative;justify-content:center}
+
+/* footer */
+footer{border-top:1px solid var(--line);padding:62px 0 42px;background:var(--bg-2)}
+.foot-grid{display:grid;grid-template-columns:1.6fr 1fr 1fr 1fr;gap:40px}
+.foot-brand p{color:var(--muted);font-size:14px;margin-top:16px;max-width:280px}
+.foot-col h5{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:14px;font-weight:600}
+.foot-col a{display:block;color:var(--muted);font-size:14px;padding:6px 0;transition:color .2s}
+.foot-col a:hover{color:var(--amber)}
+.foot-bottom{display:flex;justify-content:space-between;align-items:center;margin-top:48px;padding-top:24px;border-top:1px solid var(--line);color:var(--muted);font-size:13px;flex-wrap:wrap;gap:10px}
+.foot-bottom .mono{font-family:ui-monospace,monospace}
+
+/* reveal */
+.reveal{opacity:0;transform:translateY(20px);transition:opacity .7s ease,transform .7s ease}
+.reveal.in{opacity:1;transform:none}
+
+/* responsive */
+@media (max-width:960px){
+  .hero-grid{grid-template-columns:1fr;gap:38px}
+  .grid-3,.grid-feat{grid-template-columns:1fr}
+  .steps{grid-template-columns:repeat(2,1fr)}
+  .step:not(:last-child)::after{display:none}
+  .split{grid-template-columns:1fr}
+  .stats{grid-template-columns:1fr;gap:38px}
+  .contracts-grid{grid-template-columns:1fr}
+  .foot-grid{grid-template-columns:1fr 1fr;gap:30px}
+  .nav-links{display:none}
+}
+@media (max-width:560px){
+  .foot-grid{grid-template-columns:1fr}
+  .hero{padding-top:44px}
+  .contract-row{flex-direction:column;align-items:flex-start;gap:12px}
+  .contract-links{width:100%}
+}
+@media (prefers-reduced-motion:reduce){
+  *{animation:none !important;scroll-behavior:auto !important}
+  .reveal{opacity:1;transform:none}
+}
+</style>
+</head>
+<body>
+
+<!-- ============ NAV ============ -->
+<header class="nav-bar" id="nav">
+  <div class="wrap nav-inner">
+    <a class="brand" href="index.html" aria-label="Arclight home">
+      <span class="wm"><svg class="mark" viewBox="6 2 36 44" aria-hidden="true"><path d="M24 5 C31 12 37 26 40 43 L31.5 43 C30.5 38 29.5 35 28.5 33 L19.5 33 C18.5 35 17.5 38 16.5 43 L8 43 C11 26 17 12 24 5 Z M21 17 L21 29 L29.5 23 Z"/></svg><span class="rcl">rcl</span><span class="i">ı<svg class="pd" viewBox="0 0 10 10" aria-hidden="true"><path d="M2 1.4 L2 8.6 L8.4 5 Z"/></svg></span>ght<span class="beam" aria-hidden="true"></span></span>
+    </a>
+    <nav class="nav-links">
+      <a class="navlink" href="#gap">Problem</a>
+      <a class="navlink" href="#how">How it works</a>
+      <a class="navlink" href="#contracts">Contracts</a>
+      <a class="navlink" href="demo.html">Demo</a>
+    </nav>
+    <div class="nav-actions">
+      <button class="theme-toggle" id="themeToggle" aria-label="Toggle light and dark mode">
+        <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+      </button>
+      <a class="btn btn-primary btn-sm" href="mailto:m.malek1996@hotmail.com?subject=Arclight%20access">Request access</a>
+    </div>
+  </div>
+</header>
+
+<!-- ============ HERO ============ -->
+<section class="hero">
+  <div class="wrap hero-grid">
+    <div class="hero-copy">
+      <div class="chip"><span class="d"></span>Live on Arc L1 testnet</div>
+      <h1 class="hero-title">Every view,<br />settled in <span class="a">USDC.</span></h1>
+      <p class="hero-lead">The stablecoin-native ad rail for the crypto media economy. Reach the audiences you are banned from everywhere else, and pay only for the views you can prove.</p>
+      <div class="hero-cta">
+        <a class="btn btn-primary btn-lg" href="#how">See how it works</a>
+        <a class="btn btn-ghost btn-lg" href="#contracts">View live contracts</a>
+      </div>
+    </div>
+    <div class="panel-feed" aria-hidden="true">
+      <div class="ph"><span>Settlement feed</span><span class="live"><span class="dot"></span>live</span></div>
+      <div class="feed" id="feed">
+        <div class="item"><div class="l">Proof of view verified<b id="c0">Creator · 0x9f…21</b></div><div class="v" id="v0">+$0.042</div></div>
+        <div class="item"><div class="l">Proof of view verified<b id="c1">Creator · 0x4c…8a</b></div><div class="v" id="v1">+$0.038</div></div>
+        <div class="item"><div class="l">Proof of view verified<b id="c2">Creator · 0xb1…d7</b></div><div class="v" id="v2">+$0.051</div></div>
+        <div class="item"><div class="l">Settled to wallet<b>Instant · non-custodial</b></div><div class="v">USDC</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TECH STRIP ============ -->
+<div class="techstrip">
+  <div class="wrap">
+    <div class="techstrip-inner">
+      <span class="ts-item"><span class="d"></span>Circle Arc L1</span>
+      <span class="ts-item"><span class="d"></span>USDC settlement</span>
+      <span class="ts-item"><span class="d"></span>CCTP cross-chain</span>
+      <span class="ts-item"><span class="d"></span>Zero-knowledge proof of view</span>
+      <span class="ts-item"><span class="d"></span>StableFX payouts</span>
+      <span class="ts-item"><span class="d"></span>USYC treasury yield</span>
+      <span class="ts-item"><span class="d"></span>Programmable Wallets</span>
+      <span class="ts-item"><span class="d"></span>Non-custodial</span>
+    </div>
+  </div>
+</div>
+
+<!-- ============ PROBLEM ============ -->
+<section class="section-pad" id="gap">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="kicker">The gap</span>
+      <h2>Crypto has the budgets. The ad rails shut it out.</h2>
+      <p>Exchanges, wallets, chains and protocols run real advertising budgets, yet they are restricted or banned outright on Google and Meta. Meanwhile crypto-native video is under-monetized. Nothing connects the two.</p>
+    </div>
+    <div class="grid-3">
+      <div class="card reveal">
+        <span class="idx">01</span>
+        <h3>Stranded demand</h3>
+        <p>Crypto advertisers are locked out of the two channels that own web distribution, with money and nowhere brand-safe to spend it.</p>
+      </div>
+      <div class="card reveal">
+        <span class="idx">02</span>
+        <h3>Under-monetized supply</h3>
+        <p>Shows, research channels and communities that own crypto audiences have no clean, verifiable way to charge per view.</p>
+      </div>
+      <div class="card reveal">
+        <span class="idx">03</span>
+        <h3>No rail between them</h3>
+        <p>Legacy crypto ad networks are banner-based, fraud-ridden and custodial. There is no verifiable, instant, non-custodial rail.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ HOW IT WORKS ============ -->
+<section class="section-pad" id="how" style="padding-top:0;">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="kicker">How it works</span>
+      <h2>Fund a campaign. Pay per proven view.</h2>
+      <p>Four steps, settled on-chain in USDC. No tracking pixels, no walled garden, no 90-day payout cycle.</p>
+    </div>
+    <div class="steps">
+      <div class="step reveal"><div class="num">01</div><h4>Advertiser funds</h4><p>A campaign is funded in USDC on Arc L1, priced by attention and assurance tier.</p></div>
+      <div class="step reveal"><div class="num">02</div><h4>View is metered</h4><p>A genuine view is measured and proven privately with a zero-knowledge proof.</p></div>
+      <div class="step reveal"><div class="num">03</div><h4>Proof settles</h4><p>The protocol verifies the proof on-chain and splits payment per view, once.</p></div>
+      <div class="step reveal"><div class="num">04</div><h4>Instant payout</h4><p>Creators and embedders receive USDC instantly and non-custodially.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FEATURES ============ -->
+<section class="section-pad" id="protocol" style="padding-top:0;">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="kicker">Protocol</span>
+      <h2>Verifiable, instant, non-custodial.</h2>
+      <p>The primitives that make per-view settlement safe at scale. Every one is deployed and source-verified on Arc.</p>
+    </div>
+    <div class="grid-feat">
+      <div class="feat reveal"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9"/></svg></div><h4>Verifiable per view</h4><p>Every payment is backed by a proof that a real view actually happened.</p></div>
+      <div class="feat reveal"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h7l-1 8 10-12h-7z"/></svg></div><h4>Instant USDC settlement</h4><p>Payouts land the moment a view is proven, not on a monthly cycle.</p></div>
+      <div class="feat reveal"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 4v6c0 5-3.5 8-8 10-4.5-2-8-5-8-10V6z"/></svg></div><h4>Non-custodial</h4><p>Funds settle directly between parties. No middleman ever holds the money.</p></div>
+      <div class="feat reveal"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6l-6 6 6 6M16 6l6 6-6 6"/></svg></div><h4>Embeddable SDK</h4><p>Drop per-view settlement into any video player with a lightweight SDK.</p></div>
+      <div class="feat reveal"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></div><h4>Private by design</h4><p>Zero-knowledge proof of view. No tracking, no viewer identity on-chain.</p></div>
+      <div class="feat reveal"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg></div><h4>Sybil-resistant</h4><p>Nullifiers count each unique viewer once per campaign, so bots do not get paid.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ STATS ============ -->
+<div class="stats-band">
+  <div class="wrap">
+    <div class="stats">
+      <div class="stat reveal"><div class="val"><span class="u">$</span><span class="num-count" data-target="480">0</span><span class="u">B</span></div><div class="lbl">Market value unlocked by Arclight</div></div>
+      <div class="stat reveal"><div class="val"><span class="u">$</span><span class="num-count" data-target="40">0</span><span class="u">+</span></div><div class="lbl">Crypto CPM, multiples of open-web rates</div></div>
+      <div class="stat reveal"><div class="val"><span class="num-count" data-target="100">0</span><span class="u">%</span></div><div class="lbl">Non-custodial, funds never sit with a middleman</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ CONTRACTS ============ -->
+<section class="section-pad" id="contracts">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="kicker">Deployed and verified</span>
+      <h2>The whole system is on-chain.</h2>
+      <p>Seven contracts, live and source-verified on Arc testnet. Every address and deployment transaction is public on Arcscan.</p>
+    </div>
+    <div class="contracts-grid" id="contractList"></div>
+    <div class="contracts-foot reveal">
+      <span>Chain id <b class="mono">5042002</b></span>
+      <span>Deployer <a class="mono" href="https://testnet.arcscan.app/address/0x7Fe819050290f176c479225812d749CbB5842F6B" target="_blank" rel="noopener">0x7Fe8…2F6B</a></span>
+      <span>Attestor <a class="mono" href="https://testnet.arcscan.app/address/0x1985eAb3B9cA04CD783c605346604EADeD120780" target="_blank" rel="noopener">0x1985…0780</a></span>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SPLIT ============ -->
+<section class="section-pad" style="padding-top:0;">
+  <div class="wrap split">
+    <div class="panel reveal">
+      <span class="kicker">For advertisers</span>
+      <h3>Reach audiences you are banned from.</h3>
+      <ul>
+        <li><span class="ck">✓</span> Put budget in front of crypto-native audiences Google and Meta will not let you touch</li>
+        <li><span class="ck">✓</span> Pay only for views you can cryptographically verify</li>
+        <li><span class="ck">✓</span> Priced by attention and assurance tier, not impressions</li>
+        <li><span class="ck">✓</span> Brand-safe, vetted inventory</li>
+      </ul>
+    </div>
+    <div class="panel reveal">
+      <span class="kicker">For creators and embedders</span>
+      <h3>Monetize without a walled garden.</h3>
+      <ul>
+        <li><span class="ck">✓</span> Turn on per-view revenue in any player and keep the majority</li>
+        <li><span class="ck">✓</span> Instant, non-custodial USDC payouts</li>
+        <li><span class="ck">✓</span> Embeddable in any video surface</li>
+        <li><span class="ck">✓</span> No tracking, no lock-in</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ============ CTA ============ -->
+<section class="cta-band">
+  <div class="wrap">
+    <div class="cta-inner reveal">
+      <h2>Bring your budget where it can settle.</h2>
+      <p>Arclight is live on Arc testnet. Read the raise, or click through the working demo settling real views in USDC.</p>
+      <div class="hero-cta">
+        <a class="btn btn-primary btn-lg" href="Arclight-Investor-Deck-Final.pdf" target="_blank" rel="noopener">Read the investor deck</a>
+        <a class="btn btn-ghost btn-lg" href="demo.html">Launch the live demo</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FOOTER ============ -->
+<footer>
+  <div class="wrap">
+    <div class="foot-grid">
+      <div class="foot-brand">
+        <a class="brand" href="index.html" style="font-size:34px;" aria-label="Arclight home">
+          <span class="wm" style="font-size:34px;"><svg class="mark" viewBox="6 2 36 44" aria-hidden="true"><path d="M24 5 C31 12 37 26 40 43 L31.5 43 C30.5 38 29.5 35 28.5 33 L19.5 33 C18.5 35 17.5 38 16.5 43 L8 43 C11 26 17 12 24 5 Z M21 17 L21 29 L29.5 23 Z"/></svg><span class="rcl">rcl</span><span class="i">ı<svg class="pd" viewBox="0 0 10 10" aria-hidden="true"><path d="M2 1.4 L2 8.6 L8.4 5 Z"/></svg></span>ght<span class="beam" aria-hidden="true"></span></span>
+        </a>
+        <p>The settlement and ad rail for the crypto media economy. Built on Circle's Arc L1.</p>
+      </div>
+      <div class="foot-col">
+        <h5>Product</h5>
+        <a href="#how">How it works</a>
+        <a href="#protocol">Protocol</a>
+        <a href="#contracts">Contracts</a>
+        <a href="demo.html">Live demo</a>
+      </div>
+      <div class="foot-col">
+        <h5>Investors</h5>
+        <a href="Arclight-Investor-Deck-Final.pdf" target="_blank" rel="noopener">Investor deck (PDF)</a>
+        <a href="mailto:m.malek1996@hotmail.com?subject=Arclight%20access">Request access</a>
+      </div>
+      <div class="foot-col">
+        <h5>On-chain</h5>
+        <a href="https://testnet.arcscan.app/address/0xF848889d955bb1a59325Db91Fc1d52152E17A946" target="_blank" rel="noopener">Arcscan explorer</a>
+        <a href="https://mgx96.github.io/arclight/" target="_blank" rel="noopener">Demo app</a>
+      </div>
+    </div>
+    <div class="foot-bottom">
+      <span>© 2026 Arclight. All rights reserved.</span>
+      <span class="mono">Live on Arc testnet</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+/* ---- deployed contracts (real, from deployments/arc-testnet.json) ---- */
+const EXPLORER = "https://testnet.arcscan.app";
+const CONTRACTS = [
+  { name: "RevenuePool", role: "Core", addr: "0xF848889d955bb1a59325Db91Fc1d52152E17A946", tx: "0x49e94bb71cbc908ba5f5a6c504f8ade8925a25c307711cb41bdbc7a802379ab5" },
+  { name: "ProofOfView", role: "Core", addr: "0x1bE08B8DfB8e87F7b30315afE1d367780b0AF3Ec", tx: "0x7ac6341a5448e83c758eda8cdc73617d4cc174ac6e2458e8c47551e1d0268b73" },
+  { name: "RevenueSplitter", role: "Core", addr: "0x707Ed9d732779a204E6C4C448B4E9930cB1ab8C5", tx: "0xcfb1b47faf7cd0c10b3b37226d8f64723e13b144312a7ae9ec2b979b10c91e03" },
+  { name: "ArcCctpGateway", role: "Module", addr: "0x4A0Fb26B9e774d85aA0D4E3C3D077ebcc3E0572a", tx: "0x6f06aa844f33073860dbfca785190cd17c29bdd6a1fc427ecc990fa743d97514" },
+  { name: "StableFxPayoutRouter", role: "Module", addr: "0xEf70f1ABb1581845F9812511a774F65F0724dABc", tx: "0xc8bec18efa4a6db4f1a2b4752bf87bbe51d54f3bfeb716b1824afa597718855b" },
+  { name: "CreatorTreasury", role: "Module", addr: "0xF8D996fEa13184b440b36454418FF40556F1c88D", tx: "0x86ed58ce7dd60c54eb73aa53f574fcbe383937627ddcbef04bc6b1effff11ab6" },
+  { name: "AdvertiserAgentRegistry", role: "Module", addr: "0xa6A2B86f8ff81bA2237991F4Aa8Da3a3428E88F9", tx: "0x51f1daec203b4748b32bfa15d1012fca4364d5ce9fecd0c025ebaf76f124c203" },
+];
+document.getElementById("contractList").innerHTML = CONTRACTS.map(c => `
+  <div class="contract-row reveal">
+    <div class="contract-meta">
+      <div class="cn">${c.name} <span class="cr">· ${c.role}</span></div>
+      <div class="ca">${c.addr}</div>
+    </div>
+    <div class="contract-links">
+      <a class="pill" href="${EXPLORER}/address/${c.addr}" target="_blank" rel="noopener">Contract</a>
+      <a class="pill" href="${EXPLORER}/tx/${c.tx}" target="_blank" rel="noopener">Deploy tx</a>
+    </div>
+  </div>`).join("");
+
+/* ---- theme toggle ---- */
+const root = document.documentElement;
+document.getElementById("themeToggle").addEventListener("click", () => {
+  const next = root.getAttribute("data-theme") === "dark" ? "light" : "dark";
+  root.setAttribute("data-theme", next);
+  try { localStorage.setItem("arclight-theme", next); } catch (e) {}
+});
+
+/* ---- reveal on scroll ---- */
+const io = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } });
+}, { threshold: 0.14 });
+document.querySelectorAll(".reveal").forEach(el => io.observe(el));
+
+/* ---- count-up stats ---- */
+const easeOut = (t) => 1 - Math.pow(1 - t, 3);
+function countUp(el) {
+  const target = parseFloat(el.dataset.target);
+  const dur = 1400; const start = performance.now();
+  let done = false;
+  function finish() { if (!done) { done = true; el.textContent = target.toString(); } }
+  function tick(now) {
+    const p = Math.min(1, (now - start) / dur);
+    el.textContent = Math.round(easeOut(p) * target).toString();
+    if (p < 1) requestAnimationFrame(tick); else finish();
+  }
+  requestAnimationFrame(tick);
+  setTimeout(finish, dur + 120);
+}
+const statIO = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) { countUp(e.target); statIO.unobserve(e.target); } });
+}, { threshold: 0.5 });
+document.querySelectorAll(".num-count").forEach(el => statIO.observe(el));
+
+/* ---- live settlement feed ---- */
+(function () {
+  const rows = [
+    { c: document.getElementById("c0"), v: document.getElementById("v0") },
+    { c: document.getElementById("c1"), v: document.getElementById("v1") },
+    { c: document.getElementById("c2"), v: document.getElementById("v2") },
+  ];
+  if (rows.some(r => !r.c || !r.v)) return;
+  const hex = () => Array.from({length: 2}, () => Math.floor(Math.random()*256).toString(16).padStart(2,"0")).join("");
+  function tick() {
+    const i = Math.floor(Math.random() * rows.length);
+    const amt = (Math.random() * 0.03 + 0.03);
+    rows[i].v.textContent = "+$" + amt.toFixed(3);
+    rows[i].c.textContent = "Creator · 0x" + hex().slice(0,2) + "…" + hex();
+  }
+  setInterval(tick, 2400);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Arclight — 03 Split Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  :root{--amber:#ffb020;--ink:#eaf0f8;--muted:#8c99ae;--bg:#0b1220;--panel:rgba(255,255,255,.035);--line:rgba(255,255,255,.09)}
+  body{font-family:"Inter",sans-serif;background:var(--bg);color:var(--ink);line-height:1.55}
+  .wrap{max-width:1160px;margin:0 auto;padding:0 28px}
+  .brand{display:inline-flex;flex-direction:column;align-items:stretch;text-decoration:none;line-height:1;width:max-content}
+  .brand .wm{font-family:"Poppins",sans-serif;font-weight:800;font-size:25px;letter-spacing:-0.02em;color:var(--ink)}
+  .brand .wm .a{color:var(--amber)}
+  .brand .wm .i{position:relative}
+  .brand .wm .i::after{content:"";position:absolute;left:50%;top:-0.30em;transform:translateX(-50%);width:0;height:0;border-style:solid;border-width:3px 0 3px 5px;border-color:transparent transparent transparent var(--amber)}
+  .brand .arc{width:100%;height:7px;margin-top:4px}
+  nav{display:flex;justify-content:space-between;align-items:center;height:76px;border-bottom:1px solid var(--line)}
+  .navr{display:flex;gap:28px;align-items:center;font-size:14px;color:var(--muted)}
+  .navr a{color:inherit;text-decoration:none}.navr a:hover{color:var(--ink)}
+  .btn{border:1px solid var(--amber);color:var(--amber);padding:9px 18px;border-radius:9px;font-weight:600;font-size:14px;text-decoration:none}
+  .btn:hover{background:var(--amber);color:#151007}
+  .hero{display:grid;grid-template-columns:1.15fr 1fr;gap:44px;align-items:center;padding:64px 0}
+  .status{display:inline-flex;gap:8px;align-items:center;font-size:13px;color:var(--amber);margin-bottom:22px}
+  .status .d{width:8px;height:8px;border-radius:50%;background:var(--amber);box-shadow:0 0 9px var(--amber)}
+  h1{font-family:"Poppins",sans-serif;font-size:clamp(40px,5.4vw,62px);font-weight:800;letter-spacing:-0.03em;line-height:1.05}
+  h1 .a{color:var(--amber)}
+  .lead{color:var(--muted);font-size:18px;max-width:500px;margin:22px 0 30px}
+  .cta{display:flex;gap:14px;flex-wrap:wrap}
+  .btn-fill{background:var(--amber);color:#151007;padding:13px 24px;border-radius:10px;font-weight:600;font-size:15px;text-decoration:none}
+  .btn-line{border:1px solid var(--line);color:var(--ink);padding:13px 22px;border-radius:10px;font-weight:600;font-size:15px;text-decoration:none}
+  .panel{border:1px solid var(--line);background:var(--panel);border-radius:18px;padding:22px}
+  .panel .h{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:18px}
+  .metric{display:flex;justify-content:space-between;align-items:baseline;padding:12px 0;border-bottom:1px solid var(--line)}
+  .metric:last-of-type{border-bottom:none}
+  .metric .k{font-size:14px;color:var(--muted)}
+  .metric .v{font-family:"Poppins";font-size:26px;font-weight:700;color:var(--amber)}
+  .spark{display:flex;align-items:flex-end;gap:4px;height:52px;margin-top:16px}
+  .spark i{flex:1;background:rgba(255,176,32,.28);border-radius:2px}
+  .spark i:nth-child(3n){background:var(--amber)}
+  @media(max-width:840px){.navr a:not(.btn){display:none}.hero{grid-template-columns:1fr;gap:34px}}
+</style></head>
+<body>
+<div class="wrap">
+  <nav>
+    <a class="brand" href="#" aria-label="Arclight"><span class="wm"><span class="a">A</span>rcl<span class="i">ı</span>ght</span><svg class="arc" viewBox="0 0 120 7" preserveAspectRatio="none" aria-hidden="true"><defs><linearGradient id="ag3" x1="0" x2="1"><stop offset="0" stop-color="#ffb020" stop-opacity="0"/><stop offset=".5" stop-color="#ffb020"/><stop offset="1" stop-color="#ffb020" stop-opacity="0"/></linearGradient></defs><path d="M2 5 Q60 0 118 5" fill="none" stroke="url(#ag3)" stroke-width="2" stroke-linecap="round"/></svg></a>
+    <div class="navr"><a href="#">Protocol</a><a href="#">Contracts</a><a href="#">Demo</a><a class="btn" href="#">Request access</a></div>
+  </nav>
+  <div class="hero">
+    <div>
+      <div class="status"><span class="d"></span>Settlement engine online — Arc L1 testnet</div>
+      <h1>Every view,<br>settled in <span class="a">USDC.</span></h1>
+      <p class="lead">The ad rail for the crypto media economy. Advertisers reach audiences they're banned from. Creators get paid the instant a view is proven on-chain.</p>
+      <div class="cta"><a class="btn-fill" href="#">Run the demo</a><a class="btn-line" href="#">Read the deck</a></div>
+    </div>
+    <div class="panel">
+      <div class="h"><span>Live metrics</span><span>▲ 24h</span></div>
+      <div class="metric"><span class="k">Contracts verified</span><span class="v">7</span></div>
+      <div class="metric"><span class="k">Crypto CPM</span><span class="v">$40+</span></div>
+      <div class="metric"><span class="k">Custodial risk</span><span class="v">0%</span></div>
+      <div class="spark"><i style="height:32%"></i><i style="height:54%"></i><i style="height:44%"></i><i style="height:70%"></i><i style="height:58%"></i><i style="height:82%"></i><i style="height:66%"></i><i style="height:92%"></i><i style="height:74%"></i><i style="height:100%"></i></div>
+    </div>
+  </div>
+</div>
+</body></html>
