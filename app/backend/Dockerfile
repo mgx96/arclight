@@ -12,7 +12,10 @@ WORKDIR /app
 # Install dependencies first for better layer caching. tsx/typescript are devDependencies and are
 # required at runtime here (we execute .ts directly), so install the full dependency set.
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
-RUN pnpm install --frozen-lockfile
+# --ignore-scripts: the only package with a build script is esbuild (a transitive dep), and tsx
+# ships its own copy, so its native build is unused here. Skipping scripts also avoids pnpm 11's
+# ERR_PNPM_IGNORED_BUILDS, which otherwise exits 1 and fails the image build.
+RUN pnpm install --frozen-lockfile --ignore-scripts
 
 # Application source.
 COPY tsconfig.json ./
